@@ -46,6 +46,15 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     });
   }
 
+  // Add Admin Panel for admins
+  if (user?.role === "admin") {
+    navigationItems.push({
+      icon: Settings,
+      label: "Admin Panel",
+      path: "/admin"
+    });
+  }
+
   const isActivePath = (path: string, exact = false) => {
     if (exact) {
       return location.pathname === path;

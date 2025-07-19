@@ -11,8 +11,12 @@ import "./index.css";
 import Dashboard from "./pages/Dashboard.tsx";
 import Landing from "./pages/Landing.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import Admin from "./pages/Admin.tsx";
 import { DashboardLayout } from "./components/layout/DashboardLayout.tsx";
 import { CreateMatch } from "./components/dashboard/CreateMatch.tsx";
+import { Leaderboards } from "./components/dashboard/Leaderboards.tsx";
+import { MyMatches } from "./components/dashboard/MyMatches.tsx";
+import { SupportHub } from "./components/dashboard/SupportHub.tsx";
 import { Protected } from "./lib/protected-page.tsx";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
@@ -59,6 +63,28 @@ createRoot(document.getElementById("root")!).render(
                 </DashboardLayout>
               </Protected>
             } />
+            <Route path="/dashboard/leaderboards" element={
+              <Protected>
+                <DashboardLayout>
+                  <Leaderboards />
+                </DashboardLayout>
+              </Protected>
+            } />
+            <Route path="/dashboard/my-matches" element={
+              <Protected>
+                <DashboardLayout>
+                  <MyMatches />
+                </DashboardLayout>
+              </Protected>
+            } />
+            <Route path="/dashboard/support" element={
+              <Protected>
+                <DashboardLayout>
+                  <SupportHub />
+                </DashboardLayout>
+              </Protected>
+            } />
+            <Route path="/admin" element={<Admin />} />
           </Routes>
         </BrowserRouter>
         <Toaster />
