@@ -138,178 +138,170 @@ export function SignupForm({ onNext }: SignupFormProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <Card className="w-full max-w-md mx-auto">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Create Your Account</CardTitle>
-          <p className="text-muted-foreground">Join GameArena and start competing!</p>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email Field */}
-            <div className="space-y-2">
-              <Label htmlFor="email" className="flex items-center gap-2">
-                <Mail className="h-4 w-4" />
-                Email Address
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className={errors.email ? "border-red-500" : ""}
-              />
-              {errors.email && (
-                <p className="text-sm text-red-500">{errors.email}</p>
-              )}
-            </div>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Email Field */}
+        <div className="space-y-2">
+          <Label htmlFor="email" className="flex items-center gap-2">
+            <Mail className="h-4 w-4" />
+            Email Address
+          </Label>
+          <Input
+            id="email"
+            type="email"
+            placeholder="Enter your email"
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            className={errors.email ? "border-red-500" : ""}
+          />
+          {errors.email && (
+            <p className="text-sm text-red-500">{errors.email}</p>
+          )}
+        </div>
 
-            {/* Username Field */}
-            <div className="space-y-2">
-              <Label htmlFor="username" className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                Username
-              </Label>
-              <Input
-                id="username"
-                type="text"
-                placeholder="Choose a username"
-                value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                className={errors.username ? "border-red-500" : ""}
-              />
-              {errors.username && (
-                <p className="text-sm text-red-500">{errors.username}</p>
-              )}
-            </div>
+        {/* Username Field */}
+        <div className="space-y-2">
+          <Label htmlFor="username" className="flex items-center gap-2">
+            <User className="h-4 w-4" />
+            Username
+          </Label>
+          <Input
+            id="username"
+            type="text"
+            placeholder="Choose a username"
+            value={formData.username}
+            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+            className={errors.username ? "border-red-500" : ""}
+          />
+          {errors.username && (
+            <p className="text-sm text-red-500">{errors.username}</p>
+          )}
+        </div>
 
-            {/* Password Field */}
-            <div className="space-y-2">
-              <Label htmlFor="password" className="flex items-center gap-2">
-                <Lock className="h-4 w-4" />
-                Password
-              </Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Create a strong password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className={errors.password ? "border-red-500 pr-10" : "pr-10"}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-              
-              {/* Password Strength Indicator */}
-              {formData.password && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Password Strength:</span>
-                    <Badge variant="outline" className={getStrengthTextColor()}>
-                      {passwordStrength.strength}
-                    </Badge>
-                  </div>
-                  <Progress 
-                    value={passwordStrength.percentage} 
-                    className="h-2"
-                  />
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="flex items-center gap-1">
-                      {passwordStrength.checks.length ? (
-                        <Check className="h-3 w-3 text-green-500" />
-                      ) : (
-                        <X className="h-3 w-3 text-red-500" />
-                      )}
-                      <span>8+ characters</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      {passwordStrength.checks.uppercase ? (
-                        <Check className="h-3 w-3 text-green-500" />
-                      ) : (
-                        <X className="h-3 w-3 text-red-500" />
-                      )}
-                      <span>Uppercase</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      {passwordStrength.checks.lowercase ? (
-                        <Check className="h-3 w-3 text-green-500" />
-                      ) : (
-                        <X className="h-3 w-3 text-red-500" />
-                      )}
-                      <span>Lowercase</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      {passwordStrength.checks.number ? (
-                        <Check className="h-3 w-3 text-green-500" />
-                      ) : (
-                        <X className="h-3 w-3 text-red-500" />
-                      )}
-                      <span>Number</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      {passwordStrength.checks.special ? (
-                        <Check className="h-3 w-3 text-green-500" />
-                      ) : (
-                        <X className="h-3 w-3 text-red-500" />
-                      )}
-                      <span>Special char</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              {errors.password && (
-                <p className="text-sm text-red-500">{errors.password}</p>
-              )}
-            </div>
-
-            {/* Date of Birth Field */}
-            <div className="space-y-2">
-              <Label htmlFor="dateOfBirth" className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                Date of Birth
-              </Label>
-              <Input
-                id="dateOfBirth"
-                type="date"
-                value={formData.dateOfBirth}
-                onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
-                className={errors.dateOfBirth ? "border-red-500" : ""}
-                max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
-              />
-              {formData.dateOfBirth && (
-                <p className="text-sm text-muted-foreground">
-                  Age: {calculateAge(formData.dateOfBirth)} years old
-                </p>
-              )}
-              {errors.dateOfBirth && (
-                <p className="text-sm text-red-500">{errors.dateOfBirth}</p>
-              )}
-            </div>
-
-            <Button 
-              type="submit" 
-              className="w-full"
-              disabled={isLoading}
+        {/* Password Field */}
+        <div className="space-y-2">
+          <Label htmlFor="password" className="flex items-center gap-2">
+            <Lock className="h-4 w-4" />
+            Password
+          </Label>
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="Create a strong password"
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              className={errors.password ? "border-red-500 pr-10" : "pr-10"}
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+              onClick={() => setShowPassword(!showPassword)}
             >
-              {isLoading ? "Creating Account..." : "Continue"}
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
             </Button>
-          </form>
-        </CardContent>
-      </Card>
+          </div>
+          
+          {/* Password Strength Indicator */}
+          {formData.password && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Password Strength:</span>
+                <Badge variant="outline" className={getStrengthTextColor()}>
+                  {passwordStrength.strength}
+                </Badge>
+              </div>
+              <Progress 
+                value={passwordStrength.percentage} 
+                className="h-2"
+              />
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="flex items-center gap-1">
+                  {passwordStrength.checks.length ? (
+                    <Check className="h-3 w-3 text-green-500" />
+                  ) : (
+                    <X className="h-3 w-3 text-red-500" />
+                  )}
+                  <span>8+ characters</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  {passwordStrength.checks.uppercase ? (
+                    <Check className="h-3 w-3 text-green-500" />
+                  ) : (
+                    <X className="h-3 w-3 text-red-500" />
+                  )}
+                  <span>Uppercase</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  {passwordStrength.checks.lowercase ? (
+                    <Check className="h-3 w-3 text-green-500" />
+                  ) : (
+                    <X className="h-3 w-3 text-red-500" />
+                  )}
+                  <span>Lowercase</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  {passwordStrength.checks.number ? (
+                    <Check className="h-3 w-3 text-green-500" />
+                  ) : (
+                    <X className="h-3 w-3 text-red-500" />
+                  )}
+                  <span>Number</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  {passwordStrength.checks.special ? (
+                    <Check className="h-3 w-3 text-green-500" />
+                  ) : (
+                    <X className="h-3 w-3 text-red-500" />
+                  )}
+                  <span>Special char</span>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {errors.password && (
+            <p className="text-sm text-red-500">{errors.password}</p>
+          )}
+        </div>
+
+        {/* Date of Birth Field */}
+        <div className="space-y-2">
+          <Label htmlFor="dateOfBirth" className="flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
+            Date of Birth
+          </Label>
+          <Input
+            id="dateOfBirth"
+            type="date"
+            value={formData.dateOfBirth}
+            onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+            className={errors.dateOfBirth ? "border-red-500" : ""}
+            max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
+          />
+          {formData.dateOfBirth && (
+            <p className="text-sm text-muted-foreground">
+              Age: {calculateAge(formData.dateOfBirth)} years old
+            </p>
+          )}
+          {errors.dateOfBirth && (
+            <p className="text-sm text-red-500">{errors.dateOfBirth}</p>
+          )}
+        </div>
+
+        <Button 
+          type="submit" 
+          className="w-full"
+          disabled={isLoading}
+        >
+          {isLoading ? "Creating Account..." : "Continue"}
+        </Button>
+      </form>
     </motion.div>
   );
 }
