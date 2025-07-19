@@ -60,36 +60,44 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/terms" element={<TermsAndConditions />} />
             <Route path="/refunds" element={<RefundsAndCancellations />} />
             <Route path="/payment/callback" element={<PaymentCallback />} />
+            
+            {/* Main Dashboard */}
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dashboard/create-match" element={
-              <Protected>
-                <DashboardLayout>
-                  <CreateMatch />
-                </DashboardLayout>
-              </Protected>
-            } />
-            <Route path="/dashboard/leaderboards" element={
+            
+            {/* Clean Routes - No /dashboard prefix */}
+            <Route path="/leaderboards" element={
               <Protected>
                 <DashboardLayout>
                   <Leaderboards />
                 </DashboardLayout>
               </Protected>
             } />
-            <Route path="/dashboard/my-matches" element={
+            <Route path="/my-matches" element={
               <Protected>
                 <DashboardLayout>
                   <MyMatches />
                 </DashboardLayout>
               </Protected>
             } />
-            <Route path="/dashboard/support" element={
+            <Route path="/create-match" element={
+              <Protected>
+                <DashboardLayout>
+                  <CreateMatch />
+                </DashboardLayout>
+              </Protected>
+            } />
+            <Route path="/support" element={
               <Protected>
                 <DashboardLayout>
                   <SupportHub />
                 </DashboardLayout>
               </Protected>
             } />
+            
+            {/* Admin */}
             <Route path="/admin" element={<Admin />} />
+            
+            {/* 404 - Keep at end */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

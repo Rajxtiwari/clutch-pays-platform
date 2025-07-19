@@ -10,6 +10,7 @@ import { GamepadIcon, Mail, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { SignupForm } from "./SignupForm";
 import { TermsAcceptance } from "./TermsAcceptance";
+import { useNavigate } from "react-router";
 
 interface SignupData {
   email: string;
@@ -24,69 +25,68 @@ interface AuthCardProps {
 
 export function AuthCard({ onAuthSuccess }: AuthCardProps) {
   const { signIn } = useAuthActions();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [signupStep, setSignupStep] = useState<"form" | "terms">("form");
-  const [signupData, setSignupData] = useState<SignupData | null>(null);
+  const [signupData, setSignupData] = useState<SignupData>({
+    email: "",
+    username: "",
+    password: "",
+    dateOfBirth: "",
+  });
 
-  // Sign In with Email/Password
-  const [signInEmail, setSignInEmail] = useState("");
-  const [signInPassword, setSignInPassword] = useState("");
-
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleEmailSignIn = async (email: string) => {
     setIsLoading(true);
-
     try {
-      await signIn("password", {
-        email: signInEmail,
-        password: signInPassword,
-        flow: "signIn",
-      });
-      
-      toast.success("Welcome back!");
-      onAuthSuccess?.();
+      await signIn("resend-otp", { email });
+      toast.success("Check your email for the verification code");
     } catch (error) {
       console.error("Sign in error:", error);
-      toast.error("Invalid email or password. Please try again.");
+      toast.error("Failed to send verification email");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSignupFormNext = (data: SignupData) => {
+  const handleSignupFormComplete = (data: SignupData) => {
     setSignupData(data);
     setSignupStep("terms");
   };
 
   const handleTermsAccept = async () => {
-    if (!signupData) return;
-
     setIsLoading(true);
     try {
       await signIn("password", {
         email: signupData.email,
         password: signupData.password,
+        flow: "signUp",
+        name: signupData.username,
         username: signupData.username,
         dateOfBirth: signupData.dateOfBirth,
-        flow: "signUp",
       });
-
+      
       toast.success("Account created successfully! Welcome to GameArena!");
-      onAuthSuccess?.();
-    } catch (error: any) {
-      console.error("Sign up error:", error);
-      if (error.message?.includes("already exists")) {
-        toast.error("An account with this email already exists. Please sign in instead.");
-        setSignupStep("form");
-      } else {
-        toast.error("Failed to create account. Please try again.");
+      
+      // Call the success callback if provided
+      if (onAuthSuccess) {
+        onAuthSuccess();
       }
+      
+      // Navigate to dashboard after a short delay
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1000);
+      
+    } catch (error: any) {
+      console.error("Signup error:", error);
+      toast.error(error?.message || "Failed to create account. Please try again.");
+      setSignupStep("form"); // Go back to form on error
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleTermsBack = () => {
+  const handleBackToForm = () => {
     setSignupStep("form");
   };
 
@@ -94,7 +94,7 @@ export function AuthCard({ onAuthSuccess }: AuthCardProps) {
     return (
       <TermsAcceptance
         onAccept={handleTermsAccept}
-        onBack={handleTermsBack}
+        onBack={handleBackToForm}
         isLoading={isLoading}
       />
     );
@@ -102,11 +102,12 @@ export function AuthCard({ onAuthSuccess }: AuthCardProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="w-full max-w-md mx-auto"
     >
-      <Card className="w-full max-w-md mx-auto">
+      <Card>
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mb-4">
             <div className="h-12 w-12 bg-primary rounded-lg flex items-center justify-center">
@@ -115,7 +116,7 @@ export function AuthCard({ onAuthSuccess }: AuthCardProps) {
           </div>
           <CardTitle className="text-2xl font-bold">Welcome to GameArena</CardTitle>
           <p className="text-muted-foreground">
-            Sign in to your account or create a new one
+            Join the ultimate skill-based gaming platform
           </p>
         </CardHeader>
         <CardContent>
@@ -124,44 +125,64 @@ export function AuthCard({ onAuthSuccess }: AuthCardProps) {
               <TabsTrigger value="signin">Sign In</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
             </TabsList>
-
-            <TabsContent value="signin" className="space-y-4 mt-6">
-              <form onSubmit={handleSignIn} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
-                  <Input
-                    id="signin-email"
-                    type="email"
-                    placeholder="Enter your email"
-                    value={signInEmail}
-                    onChange={(e) => setSignInEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signin-password">Password</Label>
-                  <Input
-                    id="signin-password"
-                    type="password"
-                    placeholder="Enter your password"
-                    value={signInPassword}
-                    onChange={(e) => setSignInPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Signing In..." : "Sign In"}
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </form>
+            
+            <TabsContent value="signin" className="space-y-4">
+              <EmailSignInForm onSubmit={handleEmailSignIn} isLoading={isLoading} />
             </TabsContent>
-
-            <TabsContent value="signup" className="mt-6">
-              <SignupForm onNext={handleSignupFormNext} />
+            
+            <TabsContent value="signup" className="space-y-4">
+              <SignupForm 
+                onComplete={handleSignupFormComplete}
+                isLoading={isLoading}
+              />
             </TabsContent>
           </Tabs>
         </CardContent>
       </Card>
     </motion.div>
+  );
+}
+
+function EmailSignInForm({ 
+  onSubmit, 
+  isLoading 
+}: { 
+  onSubmit: (email: string) => void;
+  isLoading: boolean;
+}) {
+  const [email, setEmail] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email.trim()) {
+      onSubmit(email.trim());
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="email">Email</Label>
+        <Input
+          id="email"
+          type="email"
+          placeholder="Enter your email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          disabled={isLoading}
+        />
+      </div>
+      <Button type="submit" className="w-full" disabled={isLoading || !email.trim()}>
+        {isLoading ? (
+          "Sending..."
+        ) : (
+          <>
+            <Mail className="mr-2 h-4 w-4" />
+            Send Verification Code
+          </>
+        )}
+      </Button>
+    </form>
   );
 }

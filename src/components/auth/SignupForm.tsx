@@ -2,13 +2,9 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, Check, X, Calendar, User, Mail, Lock } from "lucide-react";
-import { useAuthActions } from "@convex-dev/auth/react";
-import { toast } from "sonner";
+import { Eye, EyeOff, CheckCircle, XCircle } from "lucide-react";
 
 interface SignupData {
   email: string;
@@ -18,23 +14,24 @@ interface SignupData {
 }
 
 interface SignupFormProps {
-  onNext: (data: SignupData) => void;
+  onComplete: (data: SignupData) => void;
+  isLoading?: boolean;
 }
 
-export function SignupForm({ onNext }: SignupFormProps) {
+export function SignupForm({ onComplete, isLoading = false }: SignupFormProps) {
   const [formData, setFormData] = useState<SignupData>({
     email: "",
     username: "",
     password: "",
     dateOfBirth: "",
   });
+  
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Partial<SignupData>>({});
-  const [isLoading, setIsLoading] = useState(false);
 
   // Password strength calculation
   const calculatePasswordStrength = (password: string) => {
-    let score = 0;
+    let strength = 0;
     const checks = {
       length: password.length >= 8,
       lowercase: /[a-z]/.test(password),
@@ -42,18 +39,12 @@ export function SignupForm({ onNext }: SignupFormProps) {
       number: /\d/.test(password),
       special: /[!@#$%^&*(),.?":{}|<>]/.test(password),
     };
-
-    Object.values(checks).forEach(check => check && score++);
     
-    return {
-      score,
-      percentage: (score / 5) * 100,
-      checks,
-      strength: score <= 2 ? "Weak" : score <= 3 ? "Fair" : score <= 4 ? "Good" : "Strong"
-    };
+    strength = Object.values(checks).filter(Boolean).length;
+    return { strength: (strength / 5) * 100, checks };
   };
 
-  const passwordStrength = calculatePasswordStrength(formData.password);
+  const { strength, checks } = calculatePasswordStrength(formData.password);
 
   // Age validation
   const calculateAge = (dateOfBirth: string) => {
@@ -73,11 +64,10 @@ export function SignupForm({ onNext }: SignupFormProps) {
     const newErrors: Partial<SignupData> = {};
 
     // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email) {
       newErrors.email = "Email is required";
-    } else if (!emailRegex.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Please enter a valid email";
     }
 
     // Username validation
@@ -92,8 +82,8 @@ export function SignupForm({ onNext }: SignupFormProps) {
     // Password validation
     if (!formData.password) {
       newErrors.password = "Password is required";
-    } else if (passwordStrength.score < 3) {
-      newErrors.password = "Password is too weak. Please make it stronger.";
+    } else if (formData.password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters";
     }
 
     // Date of birth validation
@@ -102,7 +92,7 @@ export function SignupForm({ onNext }: SignupFormProps) {
     } else {
       const age = calculateAge(formData.dateOfBirth);
       if (age < 18) {
-        newErrors.dateOfBirth = "You must be at least 18 years old to register";
+        newErrors.dateOfBirth = "You must be 18 years or older to register";
       }
     }
 
@@ -112,84 +102,89 @@ export function SignupForm({ onNext }: SignupFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (validateForm()) {
-      onNext(formData);
+      onComplete(formData);
+    }
+  };
+
+  const handleInputChange = (field: keyof SignupData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: undefined }));
     }
   };
 
   const getStrengthColor = () => {
-    if (passwordStrength.percentage <= 40) return "bg-red-500";
-    if (passwordStrength.percentage <= 60) return "bg-yellow-500";
-    if (passwordStrength.percentage <= 80) return "bg-blue-500";
+    if (strength < 40) return "bg-red-500";
+    if (strength < 70) return "bg-yellow-500";
     return "bg-green-500";
   };
 
-  const getStrengthTextColor = () => {
-    if (passwordStrength.percentage <= 40) return "text-red-500";
-    if (passwordStrength.percentage <= 60) return "text-yellow-500";
-    if (passwordStrength.percentage <= 80) return "text-blue-500";
-    return "text-green-500";
+  const getStrengthText = () => {
+    if (strength < 40) return "Weak";
+    if (strength < 70) return "Medium";
+    return "Strong";
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.3 }}
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Email Field */}
         <div className="space-y-2">
-          <Label htmlFor="email" className="flex items-center gap-2">
-            <Mail className="h-4 w-4" />
-            Email Address
-          </Label>
+          <Label htmlFor="email">Email Address</Label>
           <Input
             id="email"
             type="email"
             placeholder="Enter your email"
             value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            onChange={(e) => handleInputChange("email", e.target.value)}
+            disabled={isLoading}
             className={errors.email ? "border-red-500" : ""}
           />
           {errors.email && (
-            <p className="text-sm text-red-500">{errors.email}</p>
+            <p className="text-sm text-red-500 flex items-center gap-1">
+              <XCircle className="h-3 w-3" />
+              {errors.email}
+            </p>
           )}
         </div>
 
         {/* Username Field */}
         <div className="space-y-2">
-          <Label htmlFor="username" className="flex items-center gap-2">
-            <User className="h-4 w-4" />
-            Username
-          </Label>
+          <Label htmlFor="username">Username</Label>
           <Input
             id="username"
             type="text"
             placeholder="Choose a username"
             value={formData.username}
-            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+            onChange={(e) => handleInputChange("username", e.target.value)}
+            disabled={isLoading}
             className={errors.username ? "border-red-500" : ""}
           />
           {errors.username && (
-            <p className="text-sm text-red-500">{errors.username}</p>
+            <p className="text-sm text-red-500 flex items-center gap-1">
+              <XCircle className="h-3 w-3" />
+              {errors.username}
+            </p>
           )}
         </div>
 
         {/* Password Field */}
         <div className="space-y-2">
-          <Label htmlFor="password" className="flex items-center gap-2">
-            <Lock className="h-4 w-4" />
-            Password
-          </Label>
+          <Label htmlFor="password">Password</Label>
           <div className="relative">
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
               placeholder="Create a strong password"
               value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              onChange={(e) => handleInputChange("password", e.target.value)}
+              disabled={isLoading}
               className={errors.password ? "border-red-500 pr-10" : "pr-10"}
             />
             <Button
@@ -198,6 +193,7 @@ export function SignupForm({ onNext }: SignupFormProps) {
               size="sm"
               className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
               onClick={() => setShowPassword(!showPassword)}
+              disabled={isLoading}
             >
               {showPassword ? (
                 <EyeOff className="h-4 w-4" />
@@ -211,76 +207,53 @@ export function SignupForm({ onNext }: SignupFormProps) {
           {formData.password && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Password Strength:</span>
-                <Badge variant="outline" className={getStrengthTextColor()}>
-                  {passwordStrength.strength}
-                </Badge>
+                <span className="text-sm text-muted-foreground">Password strength:</span>
+                <span className={`text-sm font-medium ${
+                  strength < 40 ? "text-red-500" : 
+                  strength < 70 ? "text-yellow-500" : "text-green-500"
+                }`}>
+                  {getStrengthText()}
+                </span>
               </div>
-              <Progress 
-                value={passwordStrength.percentage} 
-                className="h-2"
-              />
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="flex items-center gap-1">
-                  {passwordStrength.checks.length ? (
-                    <Check className="h-3 w-3 text-green-500" />
-                  ) : (
-                    <X className="h-3 w-3 text-red-500" />
-                  )}
-                  <span>8+ characters</span>
+              <Progress value={strength} className="h-2" />
+              <div className="grid grid-cols-2 gap-1 text-xs">
+                <div className={`flex items-center gap-1 ${checks.length ? "text-green-600" : "text-muted-foreground"}`}>
+                  {checks.length ? <CheckCircle className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                  8+ characters
                 </div>
-                <div className="flex items-center gap-1">
-                  {passwordStrength.checks.uppercase ? (
-                    <Check className="h-3 w-3 text-green-500" />
-                  ) : (
-                    <X className="h-3 w-3 text-red-500" />
-                  )}
-                  <span>Uppercase</span>
+                <div className={`flex items-center gap-1 ${checks.uppercase ? "text-green-600" : "text-muted-foreground"}`}>
+                  {checks.uppercase ? <CheckCircle className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                  Uppercase
                 </div>
-                <div className="flex items-center gap-1">
-                  {passwordStrength.checks.lowercase ? (
-                    <Check className="h-3 w-3 text-green-500" />
-                  ) : (
-                    <X className="h-3 w-3 text-red-500" />
-                  )}
-                  <span>Lowercase</span>
+                <div className={`flex items-center gap-1 ${checks.lowercase ? "text-green-600" : "text-muted-foreground"}`}>
+                  {checks.lowercase ? <CheckCircle className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                  Lowercase
                 </div>
-                <div className="flex items-center gap-1">
-                  {passwordStrength.checks.number ? (
-                    <Check className="h-3 w-3 text-green-500" />
-                  ) : (
-                    <X className="h-3 w-3 text-red-500" />
-                  )}
-                  <span>Number</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  {passwordStrength.checks.special ? (
-                    <Check className="h-3 w-3 text-green-500" />
-                  ) : (
-                    <X className="h-3 w-3 text-red-500" />
-                  )}
-                  <span>Special char</span>
+                <div className={`flex items-center gap-1 ${checks.number ? "text-green-600" : "text-muted-foreground"}`}>
+                  {checks.number ? <CheckCircle className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                  Number
                 </div>
               </div>
             </div>
           )}
           
           {errors.password && (
-            <p className="text-sm text-red-500">{errors.password}</p>
+            <p className="text-sm text-red-500 flex items-center gap-1">
+              <XCircle className="h-3 w-3" />
+              {errors.password}
+            </p>
           )}
         </div>
 
         {/* Date of Birth Field */}
         <div className="space-y-2">
-          <Label htmlFor="dateOfBirth" className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            Date of Birth
-          </Label>
+          <Label htmlFor="dateOfBirth">Date of Birth</Label>
           <Input
             id="dateOfBirth"
             type="date"
             value={formData.dateOfBirth}
-            onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+            onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
+            disabled={isLoading}
             className={errors.dateOfBirth ? "border-red-500" : ""}
             max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
           />
@@ -290,16 +263,20 @@ export function SignupForm({ onNext }: SignupFormProps) {
             </p>
           )}
           {errors.dateOfBirth && (
-            <p className="text-sm text-red-500">{errors.dateOfBirth}</p>
+            <p className="text-sm text-red-500 flex items-center gap-1">
+              <XCircle className="h-3 w-3" />
+              {errors.dateOfBirth}
+            </p>
           )}
         </div>
 
+        {/* Submit Button */}
         <Button 
           type="submit" 
-          className="w-full"
-          disabled={isLoading}
+          className="w-full" 
+          disabled={isLoading || strength < 40}
         >
-          {isLoading ? "Creating Account..." : "Continue"}
+          {isLoading ? "Processing..." : "Continue to Terms & Conditions"}
         </Button>
       </form>
     </motion.div>

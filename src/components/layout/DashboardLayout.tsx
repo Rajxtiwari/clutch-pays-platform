@@ -34,9 +34,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const navigationItems = [
     { icon: Home, label: "Match Browser", path: "/dashboard", exact: true },
-    { icon: Trophy, label: "Leaderboards", path: "/dashboard/leaderboards" },
-    { icon: GamepadIcon, label: "My Matches", path: "/dashboard/my-matches" },
-    { icon: Users, label: "Support Hub", path: "/dashboard/support" },
+    { icon: Trophy, label: "Leaderboards", path: "/leaderboards" },
+    { icon: GamepadIcon, label: "My Matches", path: "/my-matches" },
+    { icon: Users, label: "Support Hub", path: "/support" },
   ];
 
   // Add Create Match for hosts
@@ -44,7 +44,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     navigationItems.push({
       icon: Plus,
       label: "Create a Match",
-      path: "/dashboard/create-match"
+      path: "/create-match"
     });
   }
 
