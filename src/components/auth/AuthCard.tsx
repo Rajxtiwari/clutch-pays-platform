@@ -56,14 +56,10 @@ export function AuthCard({ onAuthSuccess }: AuthCardProps) {
       
       toast.success("Welcome back to Clutch Pays!");
       
+      // Call success callback immediately
       if (onAuthSuccess) {
         onAuthSuccess();
       }
-      
-      // Force page reload to ensure clean state
-      setTimeout(() => {
-        window.location.href = "/dashboard";
-      }, 500);
       
     } catch (error: any) {
       console.error("Sign in error:", error);
@@ -92,14 +88,10 @@ export function AuthCard({ onAuthSuccess }: AuthCardProps) {
       
       toast.success("Account created successfully! Welcome to Clutch Pays!");
       
+      // Call success callback immediately
       if (onAuthSuccess) {
         onAuthSuccess();
       }
-      
-      // Force page reload to ensure clean state
-      setTimeout(() => {
-        window.location.href = "/dashboard";
-      }, 500);
       
     } catch (error: any) {
       console.error("Signup error:", error);

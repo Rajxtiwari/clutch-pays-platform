@@ -28,7 +28,10 @@ function UnauthenticatedHandler() {
   useEffect(() => {
     if (!hasTriggered.current) {
       hasTriggered.current = true;
-      openAuthOverlay();
+      // Small delay to prevent immediate triggering
+      setTimeout(() => {
+        openAuthOverlay();
+      }, 100);
     }
   }, [openAuthOverlay]);
 
