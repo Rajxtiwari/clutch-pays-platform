@@ -18,6 +18,7 @@ import { Leaderboards } from "./components/dashboard/Leaderboards.tsx";
 import { MyMatches } from "./components/dashboard/MyMatches.tsx";
 import { SupportHub } from "./components/dashboard/SupportHub.tsx";
 import { Protected } from "./lib/protected-page.tsx";
+import PaymentCallback from "./pages/PaymentCallback.tsx";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
@@ -55,6 +56,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="*" element={<NotFound />} />
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/payment/callback" element={<PaymentCallback />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard/create-match" element={
               <Protected>

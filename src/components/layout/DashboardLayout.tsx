@@ -1,6 +1,7 @@
 import { UserButton } from "@/components/auth/UserButton";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
+import { DepositModal } from "@/components/payments/DepositModal";
 import { 
   Bell, 
   Settings, 
@@ -10,7 +11,8 @@ import {
   Plus,
   Sun,
   Moon,
-  Home
+  Home,
+  DollarSign
 } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router";
@@ -90,6 +92,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 ₹{user?.walletBalance?.toFixed(2) || "0.00"}
               </span>
             </motion.div>
+            <DepositModal 
+              trigger={
+                <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                  <DollarSign className="h-4 w-4 mr-1" />
+                  Add Money
+                </Button>
+              }
+            />
           </div>
 
           {/* Right Icons */}

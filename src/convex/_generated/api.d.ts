@@ -22,6 +22,7 @@ import type * as generators_seedData from "../generators/seedData.js";
 import type * as http from "../http.js";
 import type * as leaderboards from "../leaderboards.js";
 import type * as matches from "../matches.js";
+import type * as payments from "../payments.js";
 import type * as support from "../support.js";
 import type * as transactions from "../transactions.js";
 import type * as users from "../users.js";
@@ -44,6 +45,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   leaderboards: typeof leaderboards;
   matches: typeof matches;
+  payments: typeof payments;
   support: typeof support;
   transactions: typeof transactions;
   users: typeof users;
