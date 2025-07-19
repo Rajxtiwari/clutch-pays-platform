@@ -12,6 +12,9 @@ import Dashboard from "./pages/Dashboard.tsx";
 import Landing from "./pages/Landing.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Admin from "./pages/Admin.tsx";
+import Contact from "./pages/Contact.tsx";
+import TermsAndConditions from "./pages/TermsAndConditions.tsx";
+import RefundsAndCancellations from "./pages/RefundsAndCancellations.tsx";
 import { DashboardLayout } from "./components/layout/DashboardLayout.tsx";
 import { CreateMatch } from "./components/dashboard/CreateMatch.tsx";
 import { Leaderboards } from "./components/dashboard/Leaderboards.tsx";
@@ -56,6 +59,9 @@ createRoot(document.getElementById("root")!).render(
             <Route path="*" element={<NotFound />} />
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/terms" element={<TermsAndConditions />} />
+            <Route path="/refunds" element={<RefundsAndCancellations />} />
             <Route path="/payment/callback" element={<PaymentCallback />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard/create-match" element={

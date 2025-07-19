@@ -152,7 +152,7 @@ export default function Landing() {
       </section>
 
       {/* How It Works */}
-      <section className="container px-4 py-20 bg-muted/30">
+      <section className="container px-4 py-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -305,24 +305,76 @@ export default function Landing() {
 
       {/* Footer */}
       <footer className="border-t bg-background">
-        <div className="container px-4 py-8">
-          <div className="flex flex-col md:flex-row items-center justify-between">
-            <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <div className="h-6 w-6 bg-primary rounded flex items-center justify-center">
-                <GamepadIcon className="h-4 w-4 text-primary-foreground" />
+        <div className="container px-4 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {/* Company Info */}
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <div className="h-6 w-6 bg-primary rounded flex items-center justify-center">
+                  <GamepadIcon className="h-4 w-4 text-primary-foreground" />
+                </div>
+                <span className="font-semibold">GameArena</span>
               </div>
-              <span className="font-semibold">GameArena</span>
+              <p className="text-sm text-muted-foreground">
+                India's premier skill-based gaming platform. Compete, win, and earn real money through fair and transparent gameplay.
+              </p>
+              <div className="text-sm text-muted-foreground">
+                <p>GameArena Technologies Pvt. Ltd.</p>
+                <p>123 Tech Park, Sector 5</p>
+                <p>Gurgaon, Haryana 122001</p>
+              </div>
             </div>
-            
-            <div className="flex items-center space-x-6 text-sm text-muted-foreground">
-              <a href="#" className="hover:text-foreground">Privacy Policy</a>
-              <a href="#" className="hover:text-foreground">Terms of Service</a>
-              <a href="#" className="hover:text-foreground">Support</a>
+
+            {/* Quick Links */}
+            <div className="space-y-4">
+              <h4 className="font-semibold">Quick Links</h4>
+              <div className="space-y-2 text-sm">
+                <a href="/dashboard" className="block text-muted-foreground hover:text-foreground">Dashboard</a>
+                <a href="/dashboard/leaderboards" className="block text-muted-foreground hover:text-foreground">Leaderboards</a>
+                <a href="/dashboard/support" className="block text-muted-foreground hover:text-foreground">Support</a>
+                <a href="/contact" className="block text-muted-foreground hover:text-foreground">Contact Us</a>
+              </div>
+            </div>
+
+            {/* Legal */}
+            <div className="space-y-4">
+              <h4 className="font-semibold">Legal & Policies</h4>
+              <div className="space-y-2 text-sm">
+                <a href="/terms" className="block text-muted-foreground hover:text-foreground">Terms & Conditions</a>
+                <a href="/refunds" className="block text-muted-foreground hover:text-foreground">Refunds & Cancellations</a>
+                <a href="#" className="block text-muted-foreground hover:text-foreground">Privacy Policy</a>
+                <a href="#" className="block text-muted-foreground hover:text-foreground">Fair Play Policy</a>
+              </div>
+            </div>
+
+            {/* Services */}
+            <div className="space-y-4">
+              <h4 className="font-semibold">Our Services</h4>
+              <div className="space-y-2 text-sm">
+                <p className="text-muted-foreground">• Skill-based Gaming Matches</p>
+                <p className="text-muted-foreground">• Tournament Hosting</p>
+                <p className="text-muted-foreground">• Live Streaming Platform</p>
+                <p className="text-muted-foreground">• Secure Payment Processing</p>
+                <p className="text-muted-foreground">• 24/7 Customer Support</p>
+              </div>
+              <div className="text-sm">
+                <p className="font-medium">Entry Fees: ₹10 - ₹10,000</p>
+                <p className="text-muted-foreground">Transparent pricing for all skill levels</p>
+              </div>
             </div>
           </div>
           
-          <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
-            © 2024 GameArena. All rights reserved. Play responsibly.
+          <div className="mt-8 pt-8 border-t">
+            <div className="flex flex-col md:flex-row items-center justify-between">
+              <div className="text-sm text-muted-foreground mb-4 md:mb-0">
+                © 2024 GameArena Technologies Pvt. Ltd. All rights reserved. Play responsibly.
+              </div>
+              <div className="flex items-center space-x-6 text-sm text-muted-foreground">
+                <span>🔒 Secure Payments</span>
+                <span>✓ Fair Play Certified</span>
+                <span>📞 24/7 Support</span>
+              </div>
+            </div>
           </div>
         </div>
       </footer>
