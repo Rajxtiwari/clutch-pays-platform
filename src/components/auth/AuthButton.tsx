@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useAuthOverlay } from "@/contexts/AuthContext";
 import { Authenticated, Unauthenticated, useConvexAuth } from "convex/react";
 import { Loading } from "@/components/ui/loading";
-import { Link } from "react-router";
+import { useNavigate } from "react-router";
 
 interface AuthButtonProps {
   trigger?: React.ReactNode;
@@ -33,6 +33,7 @@ export function AuthButton({
   useModal = true,
 }: AuthButtonProps) {
   const { isLoading } = useConvexAuth();
+  const navigate = useNavigate();
 
   if (isLoading) {
     return (
@@ -53,8 +54,8 @@ export function AuthButton({
             {dashboardTrigger}
           </div>
         ) : (
-          <Button>
-            <Link to="/dashboard">Dashboard</Link>
+          <Button onClick={() => navigate("/dashboard")}>
+            Dashboard
           </Button>
         )}
       </Authenticated>

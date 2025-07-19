@@ -12,16 +12,18 @@ import {
   ArrowRight,
   Play
 } from "lucide-react";
-import { Link } from "react-router";
+import { useNavigate } from "react-router";
 import { AuthButton } from "@/components/auth/AuthButton";
 
 export default function Landing() {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       {/* Navigation */}
       <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between px-4">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigate("/")}>
             <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
               <img src="/assets/logo.png" alt="Clutch Pays" className="h-6 w-6" />
             </div>
@@ -67,11 +69,9 @@ export default function Landing() {
                 </Button>
               }
               dashboardTrigger={
-                <Button size="lg" className="text-lg px-8" asChild>
-                  <Link to="/dashboard">
-                    Go to Dashboard
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
+                <Button size="lg" className="text-lg px-8" onClick={() => navigate("/dashboard")}>
+                  Go to Dashboard
+                  <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               }
             />
@@ -183,11 +183,9 @@ export default function Landing() {
               </Button>
             }
             dashboardTrigger={
-              <Button size="lg" className="text-lg px-8" asChild>
-                <Link to="/dashboard">
-                  Go to Dashboard
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
+              <Button size="lg" className="text-lg px-8" onClick={() => navigate("/dashboard")}>
+                Go to Dashboard
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             }
           />
@@ -200,7 +198,7 @@ export default function Landing() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {/* Company Info */}
             <div className="space-y-4">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigate("/")}>
                 <div className="h-6 w-6 bg-primary rounded flex items-center justify-center">
                   <img src="/assets/logo.png" alt="Clutch Pays" className="h-4 w-4" />
                 </div>
@@ -215,10 +213,10 @@ export default function Landing() {
             <div className="space-y-4">
               <h4 className="font-semibold">Quick Links</h4>
               <div className="space-y-2 text-sm">
-                <Link to="/dashboard" className="block text-muted-foreground hover:text-foreground">Dashboard</Link>
-                <Link to="/leaderboards" className="block text-muted-foreground hover:text-foreground">Leaderboards</Link>
-                <Link to="/support" className="block text-muted-foreground hover:text-foreground">Support</Link>
-                <Link to="/contact" className="block text-muted-foreground hover:text-foreground">Contact Us</Link>
+                <button onClick={() => navigate("/dashboard")} className="block text-muted-foreground hover:text-foreground text-left">Dashboard</button>
+                <button onClick={() => navigate("/leaderboards")} className="block text-muted-foreground hover:text-foreground text-left">Leaderboards</button>
+                <button onClick={() => navigate("/support")} className="block text-muted-foreground hover:text-foreground text-left">Support</button>
+                <button onClick={() => navigate("/contact")} className="block text-muted-foreground hover:text-foreground text-left">Contact Us</button>
               </div>
             </div>
 
@@ -226,8 +224,8 @@ export default function Landing() {
             <div className="space-y-4">
               <h4 className="font-semibold">Legal & Policies</h4>
               <div className="space-y-2 text-sm">
-                <Link to="/terms" className="block text-muted-foreground hover:text-foreground">Terms & Conditions</Link>
-                <Link to="/refunds" className="block text-muted-foreground hover:text-foreground">Refunds & Cancellations</Link>
+                <button onClick={() => navigate("/terms")} className="block text-muted-foreground hover:text-foreground text-left">Terms & Conditions</button>
+                <button onClick={() => navigate("/refunds")} className="block text-muted-foreground hover:text-foreground text-left">Refunds & Cancellations</button>
                 <a href="#" className="block text-muted-foreground hover:text-foreground">Privacy Policy</a>
                 <a href="#" className="block text-muted-foreground hover:text-foreground">Fair Play Policy</a>
               </div>
