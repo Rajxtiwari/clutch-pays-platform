@@ -24,11 +24,13 @@ export function AuthOverlay() {
 
   return (
     <Dialog open={showAuthOverlay} onOpenChange={closeAuthOverlay}>
-      <DialogContent className="bg-transparent border-none shadow-none max-w-md">
+      <DialogContent className="modal-responsive bg-transparent border-none shadow-none p-0 sm:p-4">
         <VisuallyHidden>
           <DialogTitle>Authentication</DialogTitle>
         </VisuallyHidden>
-        <AuthCard onAuthSuccess={handleAuthSuccess} />
+        <div className="w-full h-full overflow-y-auto">
+          <AuthCard onAuthSuccess={handleAuthSuccess} />
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -6,12 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
-import { GamepadIcon, Eye, EyeOff } from "lucide-react";
+import { GamepadIcon, Eye, EyeOff, Mail, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { SignupForm } from "./SignupForm";
 import { TermsAcceptance } from "./TermsAcceptance";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 interface SignupData {
   email: string;
@@ -27,7 +28,7 @@ interface AuthCardProps {
 export function AuthCard({ onAuthSuccess }: AuthCardProps) {
   const { signIn } = useAuthActions();
   const [isLoading, setIsLoading] = useState(false);
-  const [signupStep, setSignupStep] = useState<"form" | "terms">("form");
+  const [signupStep, setSignupStep] = useState<"form" | "terms" | "otp">("form");
   const [signupData, setSignupData] = useState<SignupData>({
     email: "",
     username: "",
@@ -35,6 +36,7 @@ export function AuthCard({ onAuthSuccess }: AuthCardProps) {
     dateOfBirth: "",
   });
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
+  const [otpCode, setOtpCode] = useState("");
 
   const signInWithCredentials = useMutation(api.userValidation.signInWithCredentials);
 
@@ -56,7 +58,6 @@ export function AuthCard({ onAuthSuccess }: AuthCardProps) {
       
       toast.success("Welcome back to Clutch Pays!");
       
-      // Call success callback immediately
       if (onAuthSuccess) {
         onAuthSuccess();
       }
@@ -77,6 +78,39 @@ export function AuthCard({ onAuthSuccess }: AuthCardProps) {
   const handleTermsAccept = async () => {
     setIsLoading(true);
     try {
+      // Send OTP to email
+      await signIn("email-otp", {
+        email: signupData.email,
+        flow: "signUp"
+      });
+      
+      setSignupStep("otp");
+      toast.success("Verification code sent to your email!");
+      
+    } catch (error: any) {
+      console.error("OTP send error:", error);
+      toast.error("Failed to send verification code. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOtpVerification = async () => {
+    if (otpCode.length !== 6) {
+      toast.error("Please enter the complete 6-digit code");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Verify OTP and create account
+      await signIn("email-otp", {
+        email: signupData.email,
+        code: otpCode,
+        flow: "signUp"
+      });
+
+      // Update user profile with signup data
       await signIn("password", {
         email: signupData.email,
         password: signupData.password,
@@ -88,15 +122,13 @@ export function AuthCard({ onAuthSuccess }: AuthCardProps) {
       
       toast.success("Account created successfully! Welcome to Clutch Pays!");
       
-      // Call success callback immediately
       if (onAuthSuccess) {
         onAuthSuccess();
       }
       
     } catch (error: any) {
-      console.error("Signup error:", error);
-      toast.error(error?.message || "Failed to create account. Please try again.");
-      setSignupStep("form");
+      console.error("OTP verification error:", error);
+      toast.error("Invalid verification code. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -106,6 +138,91 @@ export function AuthCard({ onAuthSuccess }: AuthCardProps) {
     setSignupStep("form");
   };
 
+  const handleBackToTerms = () => {
+    setSignupStep("terms");
+  };
+
+  // OTP Verification Step
+  if (signupStep === "otp") {
+    return (
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.3 }}
+        className="w-full max-w-md mx-auto"
+      >
+        <Card>
+          <CardHeader className="text-center">
+            <div className="flex items-center justify-center mb-4">
+              <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                <Mail className="h-6 w-6 text-primary" />
+              </div>
+            </div>
+            <CardTitle className="text-2xl font-bold">Verify Your Email</CardTitle>
+            <p className="text-muted-foreground">
+              We've sent a 6-digit code to <br />
+              <span className="font-medium">{signupData.email}</span>
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="otp">Verification Code</Label>
+              <div className="flex justify-center">
+                <InputOTP
+                  maxLength={6}
+                  value={otpCode}
+                  onChange={setOtpCode}
+                  disabled={isLoading}
+                >
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={4} />
+                    <InputOTPSlot index={5} />
+                  </InputOTPGroup>
+                </InputOTP>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Button
+                onClick={handleOtpVerification}
+                disabled={isLoading || otpCode.length !== 6}
+                className="w-full"
+              >
+                {isLoading ? "Verifying..." : "Verify & Create Account"}
+              </Button>
+              
+              <Button
+                variant="outline"
+                onClick={handleBackToTerms}
+                disabled={isLoading}
+                className="w-full"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Terms
+              </Button>
+            </div>
+
+            <div className="text-center">
+              <Button
+                variant="link"
+                onClick={() => handleTermsAccept()}
+                disabled={isLoading}
+                className="text-sm"
+              >
+                Didn't receive code? Resend
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    );
+  }
+
+  // Terms Step
   if (signupStep === "terms") {
     return (
       <TermsAcceptance
@@ -116,6 +233,7 @@ export function AuthCard({ onAuthSuccess }: AuthCardProps) {
     );
   }
 
+  // Main Auth Form
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
