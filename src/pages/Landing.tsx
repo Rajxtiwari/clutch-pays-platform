@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AuthButton } from "@/components/auth/AuthButton";
 import { 
   GamepadIcon, 
   Trophy, 
@@ -13,6 +12,7 @@ import {
   ArrowRight,
   Play
 } from "lucide-react";
+import { Link } from "react-router";
 
 export default function Landing() {
   return (
@@ -30,7 +30,9 @@ export default function Landing() {
           <div className="flex items-center space-x-4">
             <Button variant="ghost">How It Works</Button>
             <Button variant="ghost">Games</Button>
-            <AuthButton />
+            <Button asChild>
+              <Link to="/auth">Get Started</Link>
+            </Button>
           </div>
         </div>
       </nav>
@@ -58,14 +60,12 @@ export default function Landing() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <AuthButton 
-              trigger={
-                <Button size="lg" className="text-lg px-8">
-                  Start Playing Now
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              }
-            />
+            <Button size="lg" className="text-lg px-8" asChild>
+              <Link to="/auth">
+                Start Playing Now
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
             <Button variant="outline" size="lg" className="text-lg px-8">
               <Play className="mr-2 h-5 w-5" />
               Watch Demo
@@ -151,132 +151,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="container px-4 py-20">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            How It Works
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Get started in just three simple steps
-          </p>
-        </motion.div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.7 }}
-            className="text-center"
-          >
-            <div className="flex items-center justify-center w-16 h-16 bg-primary rounded-full text-primary-foreground text-2xl font-bold mb-4 mx-auto">
-              1
-            </div>
-            <h3 className="text-xl font-semibold mb-2">Sign Up & Verify</h3>
-            <p className="text-muted-foreground">
-              Create your account and complete verification to start playing 
-              and earning real money.
-            </p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
-            className="text-center"
-          >
-            <div className="flex items-center justify-center w-16 h-16 bg-primary rounded-full text-primary-foreground text-2xl font-bold mb-4 mx-auto">
-              2
-            </div>
-            <h3 className="text-xl font-semibold mb-2">Join Matches</h3>
-            <p className="text-muted-foreground">
-              Browse available matches, pay the entry fee, and compete against 
-              other skilled players.
-            </p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.9 }}
-            className="text-center"
-          >
-            <div className="flex items-center justify-center w-16 h-16 bg-primary rounded-full text-primary-foreground text-2xl font-bold mb-4 mx-auto">
-              3
-            </div>
-            <h3 className="text-xl font-semibold mb-2">Win & Earn</h3>
-            <p className="text-muted-foreground">
-              Showcase your skills, win matches, and earn real money that's 
-              instantly added to your wallet.
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Social Proof */}
-      <section className="container px-4 py-20">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1.0 }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Join the Winners
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            See what our top players are earning
-          </p>
-        </motion.div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <div className="flex items-center justify-center w-16 h-16 bg-yellow-100 rounded-full mb-4 mx-auto">
-                <Trophy className="h-8 w-8 text-yellow-600" />
-              </div>
-              <h3 className="text-2xl font-bold mb-2">₹1,25,000</h3>
-              <p className="text-muted-foreground">Top earner this month</p>
-              <div className="flex items-center justify-center mt-2">
-                <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                <span className="ml-1 text-sm">ProGamer_2024</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <div className="flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4 mx-auto">
-                <Users className="h-8 w-8 text-green-600" />
-              </div>
-              <h3 className="text-2xl font-bold mb-2">10,000+</h3>
-              <p className="text-muted-foreground">Active players</p>
-              <div className="flex items-center justify-center mt-2">
-                <span className="text-sm text-green-600">Growing daily</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <div className="flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4 mx-auto">
-                <GamepadIcon className="h-8 w-8 text-blue-600" />
-              </div>
-              <h3 className="text-2xl font-bold mb-2">500+</h3>
-              <p className="text-muted-foreground">Matches daily</p>
-              <div className="flex items-center justify-center mt-2">
-                <span className="text-sm text-blue-600">24/7 action</span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
       {/* CTA Section */}
       <section className="container px-4 py-20 bg-primary/5">
         <motion.div
@@ -292,14 +166,12 @@ export default function Landing() {
             Join GameArena today and turn your gaming skills into real earnings.
           </p>
           
-          <AuthButton 
-            trigger={
-              <Button size="lg" className="text-lg px-8">
-                Get Started Now
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            }
-          />
+          <Button size="lg" className="text-lg px-8" asChild>
+            <Link to="/auth">
+              Get Started Now
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Link>
+          </Button>
         </motion.div>
       </section>
 
@@ -318,21 +190,16 @@ export default function Landing() {
               <p className="text-sm text-muted-foreground">
                 India's premier skill-based gaming platform. Compete, win, and earn real money through fair and transparent gameplay.
               </p>
-              <div className="text-sm text-muted-foreground">
-                <p>GameArena Technologies Pvt. Ltd.</p>
-                <p>123 Tech Park, Sector 5</p>
-                <p>Gurgaon, Haryana 122001</p>
-              </div>
             </div>
 
             {/* Quick Links */}
             <div className="space-y-4">
               <h4 className="font-semibold">Quick Links</h4>
               <div className="space-y-2 text-sm">
-                <a href="/dashboard" className="block text-muted-foreground hover:text-foreground">Dashboard</a>
-                <a href="/dashboard/leaderboards" className="block text-muted-foreground hover:text-foreground">Leaderboards</a>
-                <a href="/dashboard/support" className="block text-muted-foreground hover:text-foreground">Support</a>
-                <a href="/contact" className="block text-muted-foreground hover:text-foreground">Contact Us</a>
+                <Link to="/dashboard" className="block text-muted-foreground hover:text-foreground">Dashboard</Link>
+                <Link to="/leaderboards" className="block text-muted-foreground hover:text-foreground">Leaderboards</Link>
+                <Link to="/support" className="block text-muted-foreground hover:text-foreground">Support</Link>
+                <Link to="/contact" className="block text-muted-foreground hover:text-foreground">Contact Us</Link>
               </div>
             </div>
 
@@ -340,8 +207,8 @@ export default function Landing() {
             <div className="space-y-4">
               <h4 className="font-semibold">Legal & Policies</h4>
               <div className="space-y-2 text-sm">
-                <a href="/terms" className="block text-muted-foreground hover:text-foreground">Terms & Conditions</a>
-                <a href="/refunds" className="block text-muted-foreground hover:text-foreground">Refunds & Cancellations</a>
+                <Link to="/terms" className="block text-muted-foreground hover:text-foreground">Terms & Conditions</Link>
+                <Link to="/refunds" className="block text-muted-foreground hover:text-foreground">Refunds & Cancellations</Link>
                 <a href="#" className="block text-muted-foreground hover:text-foreground">Privacy Policy</a>
                 <a href="#" className="block text-muted-foreground hover:text-foreground">Fair Play Policy</a>
               </div>
@@ -356,10 +223,6 @@ export default function Landing() {
                 <p className="text-muted-foreground">• Live Streaming Platform</p>
                 <p className="text-muted-foreground">• Secure Payment Processing</p>
                 <p className="text-muted-foreground">• 24/7 Customer Support</p>
-              </div>
-              <div className="text-sm">
-                <p className="font-medium">Entry Fees: ₹10 - ₹10,000</p>
-                <p className="text-muted-foreground">Transparent pricing for all skill levels</p>
               </div>
             </div>
           </div>
