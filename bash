@@ -1,0 +1,1 @@
+npx convex run generators/makeAdmin:makeUserAdmin '{"email": "your-actual-email@domain.com"}'

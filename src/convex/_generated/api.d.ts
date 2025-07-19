@@ -17,6 +17,7 @@ import type * as admin from "../admin.js";
 import type * as auth_emailOtp from "../auth/emailOtp.js";
 import type * as auth from "../auth.js";
 import type * as games from "../games.js";
+import type * as generators_makeAdmin from "../generators/makeAdmin.js";
 import type * as generators_seedData from "../generators/seedData.js";
 import type * as http from "../http.js";
 import type * as leaderboards from "../leaderboards.js";
@@ -38,6 +39,7 @@ declare const fullApi: ApiFromModules<{
   "auth/emailOtp": typeof auth_emailOtp;
   auth: typeof auth;
   games: typeof games;
+  "generators/makeAdmin": typeof generators_makeAdmin;
   "generators/seedData": typeof generators_seedData;
   http: typeof http;
   leaderboards: typeof leaderboards;
