@@ -10,7 +10,6 @@ import { GamepadIcon, Mail, ArrowRight, Eye, EyeOff, Key } from "lucide-react";
 import { toast } from "sonner";
 import { SignupForm } from "./SignupForm";
 import { TermsAcceptance } from "./TermsAcceptance";
-import { useNavigate } from "react-router";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
@@ -27,7 +26,6 @@ interface AuthCardProps {
 
 export function AuthCard({ onAuthSuccess }: AuthCardProps) {
   const { signIn } = useAuthActions();
-  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [signupStep, setSignupStep] = useState<"form" | "terms">("form");
   const [signupData, setSignupData] = useState<SignupData>({
@@ -41,24 +39,11 @@ export function AuthCard({ onAuthSuccess }: AuthCardProps) {
   const initiatePasswordReset = useMutation(api.userValidation.initiatePasswordReset);
   const signInWithCredentials = useMutation(api.userValidation.signInWithCredentials);
 
-  const handleAuthSuccess = () => {
-    // Close the overlay first
-    if (onAuthSuccess) {
-      onAuthSuccess();
-    }
-    
-    // Then navigate to dashboard after a short delay
-    setTimeout(() => {
-      navigate("/dashboard");
-    }, 100);
-  };
-
   const handleEmailSignIn = async (email: string) => {
     setIsLoading(true);
     try {
       await signIn("resend-otp", { email });
       toast.success("Check your email for the verification code");
-      // Don't call handleAuthSuccess here, wait for actual authentication
     } catch (error) {
       console.error("Sign in error:", error);
       toast.error("Failed to send verification email");
@@ -70,7 +55,6 @@ export function AuthCard({ onAuthSuccess }: AuthCardProps) {
   const handlePasswordSignIn = async (identifier: string, password: string) => {
     setIsLoading(true);
     try {
-      // First validate credentials and get email
       const result = await signInWithCredentials({ identifier, password });
       
       if (!result.success || !result.email) {
@@ -78,7 +62,6 @@ export function AuthCard({ onAuthSuccess }: AuthCardProps) {
         return;
       }
 
-      // Now sign in with the email
       await signIn("password", { 
         email: result.email,
         password,
@@ -86,7 +69,15 @@ export function AuthCard({ onAuthSuccess }: AuthCardProps) {
       });
       
       toast.success("Welcome back to GameArena!");
-      handleAuthSuccess();
+      
+      if (onAuthSuccess) {
+        onAuthSuccess();
+      }
+      
+      // Force page reload to ensure clean state
+      setTimeout(() => {
+        window.location.href = "/dashboard";
+      }, 500);
       
     } catch (error: any) {
       console.error("Sign in error:", error);
@@ -132,12 +123,20 @@ export function AuthCard({ onAuthSuccess }: AuthCardProps) {
       });
       
       toast.success("Account created successfully! Welcome to GameArena!");
-      handleAuthSuccess();
+      
+      if (onAuthSuccess) {
+        onAuthSuccess();
+      }
+      
+      // Force page reload to ensure clean state
+      setTimeout(() => {
+        window.location.href = "/dashboard";
+      }, 500);
       
     } catch (error: any) {
       console.error("Signup error:", error);
       toast.error(error?.message || "Failed to create account. Please try again.");
-      setSignupStep("form"); // Go back to form on error
+      setSignupStep("form");
     } finally {
       setIsLoading(false);
     }
