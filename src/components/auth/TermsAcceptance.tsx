@@ -38,20 +38,20 @@ export function TermsAcceptance({ onAccept, onBack, isLoading }: TermsAcceptance
             </p>
           </CardHeader>
           
-          <CardContent className="flex-1 flex flex-col p-6 min-h-0">
-            {/* Scrollable Terms Content */}
-            <div className="border rounded-lg flex-1 overflow-hidden mb-6">
+          <CardContent className="flex-1 flex flex-col p-6 overflow-hidden">
+            {/* Scrollable Terms Content - Fixed Height */}
+            <div className="border rounded-lg mb-6" style={{ height: '300px' }}>
               <div className="p-4 bg-muted/50 border-b flex-shrink-0">
                 <h3 className="font-semibold flex items-center gap-2">
                   <Shield className="h-4 w-4" />
                   GameArena Terms of Service
                 </h3>
               </div>
-              <ScrollArea className="h-full">
-                <div className="p-4 space-y-4 text-sm">
+              <ScrollArea className="h-64 p-4">
+                <div className="space-y-4 text-sm pr-4">
                   <section>
                     <h4 className="font-semibold mb-2">1. Acceptance of Terms</h4>
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground mb-3">
                       By creating an account on GameArena, you agree to be bound by these Terms of Service, 
                       our Privacy Policy, and all applicable laws and regulations. If you do not agree with 
                       any of these terms, you are prohibited from using our services.
@@ -60,7 +60,7 @@ export function TermsAcceptance({ onAccept, onBack, isLoading }: TermsAcceptance
 
                   <section>
                     <h4 className="font-semibold mb-2">2. Eligibility</h4>
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground mb-3">
                       You must be at least 18 years old to use GameArena. By registering, you represent 
                       and warrant that you are of legal age to form a binding contract and are not 
                       prohibited from using our services under applicable law.
@@ -69,7 +69,7 @@ export function TermsAcceptance({ onAccept, onBack, isLoading }: TermsAcceptance
 
                   <section>
                     <h4 className="font-semibold mb-2">3. Account Registration</h4>
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground mb-3">
                       You must provide accurate, current, and complete information during registration. 
                       You are responsible for maintaining the confidentiality of your account credentials 
                       and for all activities that occur under your account.
@@ -78,7 +78,7 @@ export function TermsAcceptance({ onAccept, onBack, isLoading }: TermsAcceptance
 
                   <section>
                     <h4 className="font-semibold mb-2">4. Gaming Services</h4>
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground mb-3">
                       GameArena provides skill-based gaming competitions where users can participate in 
                       matches for real money prizes. All games are based on skill, not chance. We maintain 
                       strict fair play policies and use advanced verification systems.
@@ -87,7 +87,7 @@ export function TermsAcceptance({ onAccept, onBack, isLoading }: TermsAcceptance
 
                   <section>
                     <h4 className="font-semibold mb-2">5. Financial Terms</h4>
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground mb-3">
                       Entry fees, deposits, and withdrawals are processed securely through our payment 
                       partners. All transactions are subject to verification. Winnings are distributed 
                       automatically upon match completion and verification.
@@ -96,7 +96,7 @@ export function TermsAcceptance({ onAccept, onBack, isLoading }: TermsAcceptance
 
                   <section>
                     <h4 className="font-semibold mb-2">6. Fair Play Policy</h4>
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground mb-3">
                       We have zero tolerance for cheating, collusion, or any form of unfair play. 
                       All matches are monitored and may be live-streamed for transparency. Violations 
                       may result in account suspension and forfeiture of funds.
@@ -105,7 +105,7 @@ export function TermsAcceptance({ onAccept, onBack, isLoading }: TermsAcceptance
 
                   <section>
                     <h4 className="font-semibold mb-2">7. Privacy and Data Protection</h4>
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground mb-3">
                       We collect and process your personal information in accordance with our Privacy Policy. 
                       Your data is protected using industry-standard security measures. We may use your 
                       information to improve our services and ensure platform security.
@@ -114,7 +114,7 @@ export function TermsAcceptance({ onAccept, onBack, isLoading }: TermsAcceptance
 
                   <section>
                     <h4 className="font-semibold mb-2">8. Prohibited Activities</h4>
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground mb-3">
                       You may not use our platform for any illegal activities, create multiple accounts, 
                       engage in money laundering, or attempt to manipulate our systems. Violation of 
                       these terms may result in immediate account termination.
@@ -123,7 +123,7 @@ export function TermsAcceptance({ onAccept, onBack, isLoading }: TermsAcceptance
 
                   <section>
                     <h4 className="font-semibold mb-2">9. Limitation of Liability</h4>
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground mb-3">
                       GameArena's liability is limited to the maximum extent permitted by law. We are 
                       not responsible for any indirect, incidental, or consequential damages arising 
                       from your use of our services.
@@ -132,7 +132,7 @@ export function TermsAcceptance({ onAccept, onBack, isLoading }: TermsAcceptance
 
                   <section>
                     <h4 className="font-semibold mb-2">10. Governing Law</h4>
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground mb-3">
                       These terms are governed by the laws of India. Any disputes will be resolved 
                       through binding arbitration in accordance with Indian arbitration laws.
                     </p>
@@ -140,9 +140,45 @@ export function TermsAcceptance({ onAccept, onBack, isLoading }: TermsAcceptance
 
                   <section>
                     <h4 className="font-semibold mb-2">11. Contact Information</h4>
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground mb-3">
                       For any questions regarding these terms, please contact us at legal@gamearena.com 
                       or through our support system. We are committed to addressing your concerns promptly.
+                    </p>
+                  </section>
+
+                  <section>
+                    <h4 className="font-semibold mb-2">12. User Conduct</h4>
+                    <p className="text-muted-foreground mb-3">
+                      Users must maintain respectful behavior towards other players and staff. Harassment, 
+                      abuse, or inappropriate conduct will result in account suspension. We reserve the 
+                      right to monitor communications for safety and compliance purposes.
+                    </p>
+                  </section>
+
+                  <section>
+                    <h4 className="font-semibold mb-2">13. Intellectual Property</h4>
+                    <p className="text-muted-foreground mb-3">
+                      All content, trademarks, and intellectual property on GameArena are owned by us or 
+                      our licensors. Users may not reproduce, distribute, or create derivative works 
+                      without explicit written permission.
+                    </p>
+                  </section>
+
+                  <section>
+                    <h4 className="font-semibold mb-2">14. Service Availability</h4>
+                    <p className="text-muted-foreground mb-3">
+                      We strive to maintain 24/7 service availability but cannot guarantee uninterrupted 
+                      access. Scheduled maintenance will be announced in advance. We are not liable for 
+                      losses due to service interruptions.
+                    </p>
+                  </section>
+
+                  <section>
+                    <h4 className="font-semibold mb-2">15. Modifications to Terms</h4>
+                    <p className="text-muted-foreground mb-3">
+                      We reserve the right to modify these terms at any time. Users will be notified of 
+                      significant changes via email or platform notifications. Continued use of our 
+                      services constitutes acceptance of modified terms.
                     </p>
                   </section>
                 </div>
