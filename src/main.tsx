@@ -33,7 +33,6 @@ function RouteSyncer() {
       "*",
     );
   }, [location.pathname]);
-
   useEffect(() => {
     function handleMessage(event: MessageEvent) {
       if (event.data?.type === "navigate") {
@@ -44,7 +43,6 @@ function RouteSyncer() {
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
   }, []);
-
   return null;
 }
 
@@ -56,7 +54,6 @@ createRoot(document.getElementById("root")!).render(
         <BrowserRouter>
           <RouteSyncer />
           <Routes>
-            <Route path="*" element={<NotFound />} />
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/contact" element={<Contact />} />
@@ -93,6 +90,7 @@ createRoot(document.getElementById("root")!).render(
               </Protected>
             } />
             <Route path="/admin" element={<Admin />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
         <Toaster />
