@@ -78,10 +78,6 @@ export function AuthCard({ onAuthSuccess }: AuthCardProps) {
         onAuthSuccess();
       }
       
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 1000);
-      
     } catch (error: any) {
       console.error("Sign in error:", error);
       toast.error(error?.message || "Invalid credentials. Please try again.");
@@ -131,11 +127,6 @@ export function AuthCard({ onAuthSuccess }: AuthCardProps) {
       if (onAuthSuccess) {
         onAuthSuccess();
       }
-      
-      // Navigate to dashboard after a short delay
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 1000);
       
     } catch (error: any) {
       console.error("Signup error:", error);

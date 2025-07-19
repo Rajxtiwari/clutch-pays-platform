@@ -6,17 +6,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { useAuthOverlay } from "@/contexts/AuthContext";
 import { Authenticated, Unauthenticated, useConvexAuth } from "convex/react";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
-import { Link, useNavigate } from "react-router";
-import { AuthCard } from "./AuthCard";
+import { Link } from "react-router";
 
 interface AuthButtonProps {
   trigger?: React.ReactNode;
@@ -24,40 +17,12 @@ interface AuthButtonProps {
   useModal?: boolean;
 }
 
-const UnauthenticatedButton = ({ useModal, trigger }: AuthButtonProps) => {
-  const [open, setOpen] = useState(false);
-  const [isRedirecting, setIsRedirecting] = useState(false);
-
-  const navigate = useNavigate();
-
-  const handleOpenChange = (newOpen: boolean) => {
-    if (isRedirecting && !newOpen) {
-      return;
-    }
-    setOpen(newOpen);
-  };
-
-  const handleAuthSuccess = () => {
-    setIsRedirecting(true);
-  };
+const UnauthenticatedButton = ({ trigger }: AuthButtonProps) => {
+  const { openAuthOverlay } = useAuthOverlay();
 
   return (
-    <div>
-      {useModal ? (
-        <Dialog open={open} onOpenChange={handleOpenChange}>
-          <DialogTrigger asChild>
-            {trigger || <Button>Get Started</Button>}
-          </DialogTrigger>
-          <DialogContent className="bg-transparent border-none shadow-none">
-            <DialogTitle></DialogTitle>
-            <AuthCard onAuthSuccess={handleAuthSuccess} />
-          </DialogContent>
-        </Dialog>
-      ) : trigger ? (
-        <div onClick={() => navigate("/auth")}>{trigger}</div>
-      ) : (
-        <Button onClick={() => navigate("/auth")}>Get Started</Button>
-      )}
+    <div onClick={openAuthOverlay} className="cursor-pointer">
+      {trigger || <Button>Get Started</Button>}
     </div>
   );
 };
@@ -95,7 +60,7 @@ export function AuthButton({
       </Authenticated>
 
       <Unauthenticated>
-        <UnauthenticatedButton useModal={useModal} trigger={trigger} />
+        <UnauthenticatedButton trigger={trigger} />
       </Unauthenticated>
     </div>
   );

@@ -22,6 +22,8 @@ import { MyMatches } from "./components/dashboard/MyMatches.tsx";
 import { SupportHub } from "./components/dashboard/SupportHub.tsx";
 import { Protected } from "./lib/protected-page.tsx";
 import PaymentCallback from "./pages/PaymentCallback.tsx";
+import { AuthProvider } from "./contexts/AuthContext.tsx";
+import { AuthOverlay } from "./components/auth/AuthOverlay.tsx";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
@@ -51,57 +53,59 @@ createRoot(document.getElementById("root")!).render(
     <VlyToolbar />
     <InstrumentationProvider>
       <ConvexAuthProvider client={convex}>
-        <BrowserRouter>
-          <RouteSyncer />
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/terms" element={<TermsAndConditions />} />
-            <Route path="/refunds" element={<RefundsAndCancellations />} />
-            <Route path="/payment/callback" element={<PaymentCallback />} />
-            
-            {/* Main Dashboard */}
-            <Route path="/dashboard" element={<Dashboard />} />
-            
-            {/* Clean Routes - No /dashboard prefix */}
-            <Route path="/leaderboards" element={
-              <Protected>
-                <DashboardLayout>
-                  <Leaderboards />
-                </DashboardLayout>
-              </Protected>
-            } />
-            <Route path="/my-matches" element={
-              <Protected>
-                <DashboardLayout>
-                  <MyMatches />
-                </DashboardLayout>
-              </Protected>
-            } />
-            <Route path="/create-match" element={
-              <Protected>
-                <DashboardLayout>
-                  <CreateMatch />
-                </DashboardLayout>
-              </Protected>
-            } />
-            <Route path="/support" element={
-              <Protected>
-                <DashboardLayout>
-                  <SupportHub />
-                </DashboardLayout>
-              </Protected>
-            } />
-            
-            {/* Admin */}
-            <Route path="/admin" element={<Admin />} />
-            
-            {/* 404 - Keep at end */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-        <Toaster />
+        <AuthProvider>
+          <BrowserRouter>
+            <RouteSyncer />
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/terms" element={<TermsAndConditions />} />
+              <Route path="/refunds" element={<RefundsAndCancellations />} />
+              <Route path="/payment/callback" element={<PaymentCallback />} />
+              
+              {/* Main Dashboard */}
+              <Route path="/dashboard" element={<Dashboard />} />
+              
+              {/* Clean Routes - No /dashboard prefix */}
+              <Route path="/leaderboards" element={
+                <Protected>
+                  <DashboardLayout>
+                    <Leaderboards />
+                  </DashboardLayout>
+                </Protected>
+              } />
+              <Route path="/my-matches" element={
+                <Protected>
+                  <DashboardLayout>
+                    <MyMatches />
+                  </DashboardLayout>
+                </Protected>
+              } />
+              <Route path="/create-match" element={
+                <Protected>
+                  <DashboardLayout>
+                    <CreateMatch />
+                  </DashboardLayout>
+                </Protected>
+              } />
+              <Route path="/support" element={
+                <Protected>
+                  <DashboardLayout>
+                    <SupportHub />
+                  </DashboardLayout>
+                </Protected>
+              } />
+              
+              {/* Admin */}
+              <Route path="/admin" element={<Admin />} />
+              
+              {/* 404 - Keep at end */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <AuthOverlay />
+          </BrowserRouter>
+          <Toaster />
+        </AuthProvider>
       </ConvexAuthProvider>
     </InstrumentationProvider>
   </StrictMode>,

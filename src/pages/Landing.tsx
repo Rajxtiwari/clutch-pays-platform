@@ -13,6 +13,7 @@ import {
   Play
 } from "lucide-react";
 import { Link } from "react-router";
+import { AuthButton } from "@/components/auth/AuthButton";
 
 export default function Landing() {
   return (
@@ -30,9 +31,7 @@ export default function Landing() {
           <div className="flex items-center space-x-4">
             <Button variant="ghost">How It Works</Button>
             <Button variant="ghost">Games</Button>
-            <Button asChild>
-              <Link to="/auth">Get Started</Link>
-            </Button>
+            <AuthButton />
           </div>
         </div>
       </nav>
@@ -60,12 +59,22 @@ export default function Landing() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="text-lg px-8" asChild>
-              <Link to="/auth">
-                Start Playing Now
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
+            <AuthButton 
+              trigger={
+                <Button size="lg" className="text-lg px-8">
+                  Start Playing Now
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              }
+              dashboardTrigger={
+                <Button size="lg" className="text-lg px-8" asChild>
+                  <Link to="/dashboard">
+                    Go to Dashboard
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+              }
+            />
             <Button variant="outline" size="lg" className="text-lg px-8">
               <Play className="mr-2 h-5 w-5" />
               Watch Demo
@@ -166,12 +175,22 @@ export default function Landing() {
             Join GameArena today and turn your gaming skills into real earnings.
           </p>
           
-          <Button size="lg" className="text-lg px-8" asChild>
-            <Link to="/auth">
-              Get Started Now
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Link>
-          </Button>
+          <AuthButton 
+            trigger={
+              <Button size="lg" className="text-lg px-8">
+                Get Started Now
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            }
+            dashboardTrigger={
+              <Button size="lg" className="text-lg px-8" asChild>
+                <Link to="/dashboard">
+                  Go to Dashboard
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+            }
+          />
         </motion.div>
       </section>
 
