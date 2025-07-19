@@ -15,40 +15,32 @@ import { formatDistanceToNow } from "date-fns";
 export function TransactionManagement() {
   const pendingDeposits = useQuery(api.admin.getPendingTransactions, { type: "deposit" });
   const pendingWithdrawals = useQuery(api.admin.getPendingTransactions, { type: "withdrawal" });
+  
   const approveTransaction = useMutation(api.admin.approveTransaction);
-  const rejectTransaction = useMutation(api.admin.rejectTransaction);
 
-  const [rejectionReason, setRejectionReason] = useState("");
-  const [adminNotes, setAdminNotes] = useState("");
-
-  const handleApprove = async (transactionId: string, notes?: string) => {
+  const handleApprove = async (transactionId: any, notes?: string) => {
     try {
-      await approveTransaction({ 
+      await approveTransaction({
         transactionId: transactionId as any,
-        adminNotes: notes 
+        approved: true,
+        adminNotes: notes
       });
       toast.success("Transaction approved successfully");
-      setAdminNotes("");
-    } catch (error) {
-      toast.error("Failed to approve transaction");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to approve transaction");
     }
   };
 
-  const handleReject = async (transactionId: string, reason: string) => {
-    if (!reason.trim()) {
-      toast.error("Please provide a rejection reason");
-      return;
-    }
-
+  const handleReject = async (transactionId: any, notes?: string) => {
     try {
-      await rejectTransaction({ 
-        transactionId: transactionId as any, 
-        reason 
+      await approveTransaction({
+        transactionId: transactionId as any,
+        approved: false,
+        adminNotes: notes
       });
-      toast.success("Transaction rejected");
-      setRejectionReason("");
-    } catch (error) {
-      toast.error("Failed to reject transaction");
+      toast.success("Transaction rejected successfully");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to reject transaction");
     }
   };
 
