@@ -9,7 +9,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router";
 import "./index.css";
 import Dashboard from "./pages/Dashboard.tsx";
-import Landing from "./pages/Landing.tsx";
+import Landing from "./pages/TestLanding.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Admin from "./pages/Admin.tsx";
 import Contact from "./pages/Contact.tsx";
