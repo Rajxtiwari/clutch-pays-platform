@@ -14,6 +14,7 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as admin from "../admin.js";
+import type * as auth_customPassword from "../auth/customPassword.js";
 import type * as auth_emailOtp from "../auth/emailOtp.js";
 import type * as auth_passwordAuth from "../auth/passwordAuth.js";
 import type * as auth from "../auth.js";
@@ -27,6 +28,7 @@ import type * as matches from "../matches.js";
 import type * as payments from "../payments.js";
 import type * as support from "../support.js";
 import type * as transactions from "../transactions.js";
+import type * as userValidation from "../userValidation.js";
 import type * as users from "../users.js";
 
 /**
@@ -39,6 +41,7 @@ import type * as users from "../users.js";
  */
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
+  "auth/customPassword": typeof auth_customPassword;
   "auth/emailOtp": typeof auth_emailOtp;
   "auth/passwordAuth": typeof auth_passwordAuth;
   auth: typeof auth;
@@ -52,6 +55,7 @@ declare const fullApi: ApiFromModules<{
   payments: typeof payments;
   support: typeof support;
   transactions: typeof transactions;
+  userValidation: typeof userValidation;
   users: typeof users;
 }>;
 export declare const api: FilterApi<

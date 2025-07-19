@@ -22,5 +22,33 @@ const CustomPassword = Password<DataModel>({
 });
 
 export const { auth, signIn, signOut, store } = convexAuth({
-  providers: [CustomPassword],
+  providers: [
+    CustomPassword,
+    // Add email OTP as fallback
+    {
+      id: "resend-otp",
+      name: "Email OTP",
+      type: "email",
+      maxAge: 60 * 15, // 15 minutes
+      generateVerificationToken() {
+        return Math.random().toString(36).substring(2, 8).toUpperCase();
+      },
+      async sendVerificationRequest({ identifier: email, token }) {
+        const axios = await import("axios");
+        await axios.default.post(
+          "https://email.vly.ai/send_otp",
+          {
+            to: email,
+            otp: token,
+            appName: process.env.VLY_APP_NAME || "GameArena",
+          },
+          {
+            headers: {
+              "x-api-key": "vlytothemoon2025",
+            },
+          },
+        );
+      },
+    }
+  ],
 });

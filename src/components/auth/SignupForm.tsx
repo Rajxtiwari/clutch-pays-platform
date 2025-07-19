@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, CheckCircle, XCircle } from "lucide-react";
+import { Eye, EyeOff, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { useDebounce } from "@/hooks/use-debounce";
 
 interface SignupData {
   email: string;
@@ -28,6 +31,21 @@ export function SignupForm({ onComplete, isLoading = false }: SignupFormProps) {
   
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Partial<SignupData>>({});
+
+  // Debounced values for API calls
+  const debouncedUsername = useDebounce(formData.username, 500);
+  const debouncedEmail = useDebounce(formData.email, 500);
+  
+  // Real-time validation queries
+  const usernameCheck = useQuery(
+    api.userValidation.checkUsernameAvailability,
+    debouncedUsername.length >= 3 ? { username: debouncedUsername } : "skip"
+  );
+  
+  const emailCheck = useQuery(
+    api.userValidation.checkEmailAvailability,
+    debouncedEmail.includes("@") ? { email: debouncedEmail } : "skip"
+  );
 
   // Password strength calculation
   const calculatePasswordStrength = (password: string) => {
@@ -68,6 +86,8 @@ export function SignupForm({ onComplete, isLoading = false }: SignupFormProps) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Please enter a valid email";
+    } else if (emailCheck && !emailCheck.available) {
+      newErrors.email = emailCheck.message;
     }
 
     // Username validation
@@ -77,6 +97,8 @@ export function SignupForm({ onComplete, isLoading = false }: SignupFormProps) {
       newErrors.username = "Username must be at least 3 characters";
     } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
       newErrors.username = "Username can only contain letters, numbers, and underscores";
+    } else if (usernameCheck && !usernameCheck.available) {
+      newErrors.username = usernameCheck.message;
     }
 
     // Password validation
@@ -102,7 +124,7 @@ export function SignupForm({ onComplete, isLoading = false }: SignupFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateForm()) {
+    if (validateForm() && usernameCheck?.available && emailCheck?.available) {
       onComplete(formData);
     }
   };
@@ -127,6 +149,8 @@ export function SignupForm({ onComplete, isLoading = false }: SignupFormProps) {
     return "Strong";
   };
 
+  const isFormValid = usernameCheck?.available && emailCheck?.available && strength >= 40;
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -137,41 +161,87 @@ export function SignupForm({ onComplete, isLoading = false }: SignupFormProps) {
         {/* Email Field */}
         <div className="space-y-2">
           <Label htmlFor="email">Email Address</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="Enter your email"
-            value={formData.email}
-            onChange={(e) => handleInputChange("email", e.target.value)}
-            disabled={isLoading}
-            className={errors.email ? "border-red-500" : ""}
-          />
-          {errors.email && (
+          <div className="relative">
+            <Input
+              id="email"
+              type="email"
+              placeholder="Enter your email"
+              value={formData.email}
+              onChange={(e) => handleInputChange("email", e.target.value)}
+              disabled={isLoading}
+              className={errors.email ? "border-red-500" : emailCheck?.available ? "border-green-500" : ""}
+            />
+            {debouncedEmail.includes("@") && (
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                {emailCheck === undefined ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                ) : emailCheck.available ? (
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                ) : (
+                  <XCircle className="h-4 w-4 text-red-500" />
+                )}
+              </div>
+            )}
+          </div>
+          {errors.email ? (
             <p className="text-sm text-red-500 flex items-center gap-1">
               <XCircle className="h-3 w-3" />
               {errors.email}
             </p>
-          )}
+          ) : emailCheck && !emailCheck.available ? (
+            <p className="text-sm text-red-500 flex items-center gap-1">
+              <XCircle className="h-3 w-3" />
+              {emailCheck.message}
+            </p>
+          ) : emailCheck?.available ? (
+            <p className="text-sm text-green-600 flex items-center gap-1">
+              <CheckCircle className="h-3 w-3" />
+              {emailCheck.message}
+            </p>
+          ) : null}
         </div>
 
         {/* Username Field */}
         <div className="space-y-2">
           <Label htmlFor="username">Username</Label>
-          <Input
-            id="username"
-            type="text"
-            placeholder="Choose a username"
-            value={formData.username}
-            onChange={(e) => handleInputChange("username", e.target.value)}
-            disabled={isLoading}
-            className={errors.username ? "border-red-500" : ""}
-          />
-          {errors.username && (
+          <div className="relative">
+            <Input
+              id="username"
+              type="text"
+              placeholder="Choose a username"
+              value={formData.username}
+              onChange={(e) => handleInputChange("username", e.target.value)}
+              disabled={isLoading}
+              className={errors.username ? "border-red-500" : usernameCheck?.available ? "border-green-500" : ""}
+            />
+            {debouncedUsername.length >= 3 && (
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                {usernameCheck === undefined ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                ) : usernameCheck.available ? (
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                ) : (
+                  <XCircle className="h-4 w-4 text-red-500" />
+                )}
+              </div>
+            )}
+          </div>
+          {errors.username ? (
             <p className="text-sm text-red-500 flex items-center gap-1">
               <XCircle className="h-3 w-3" />
               {errors.username}
             </p>
-          )}
+          ) : usernameCheck && !usernameCheck.available ? (
+            <p className="text-sm text-red-500 flex items-center gap-1">
+              <XCircle className="h-3 w-3" />
+              {usernameCheck.message}
+            </p>
+          ) : usernameCheck?.available ? (
+            <p className="text-sm text-green-600 flex items-center gap-1">
+              <CheckCircle className="h-3 w-3" />
+              {usernameCheck.message}
+            </p>
+          ) : null}
         </div>
 
         {/* Password Field */}
@@ -274,7 +344,7 @@ export function SignupForm({ onComplete, isLoading = false }: SignupFormProps) {
         <Button 
           type="submit" 
           className="w-full" 
-          disabled={isLoading || strength < 40}
+          disabled={isLoading || !isFormValid}
         >
           {isLoading ? "Processing..." : "Continue to Terms & Conditions"}
         </Button>
