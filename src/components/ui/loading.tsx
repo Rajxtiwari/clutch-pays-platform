@@ -1,8 +1,26 @@
+import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface LoadingProps {
   className?: string;
   size?: "sm" | "md" | "lg";
+}
+
+interface SpinnerProps {
+  className?: string;
+  size?: "sm" | "md" | "lg";
+}
+
+export function Spinner({ className, size = "md" }: SpinnerProps) {
+  const sizeClasses = {
+    sm: "h-4 w-4",
+    md: "h-6 w-6",
+    lg: "h-8 w-8"
+  };
+
+  return (
+    <Loader2 className={cn("animate-spin", sizeClasses[size], className)} />
+  );
 }
 
 export function Loading({ className, size = "md" }: LoadingProps) {
@@ -17,7 +35,7 @@ export function Loading({ className, size = "md" }: LoadingProps) {
       <img 
         src="https://i.ibb.co/pBPjSB1R/ani-logo.gif" 
         alt="Loading..." 
-        className={cn("animate-pulse", sizeClasses[size])}
+        className={cn(sizeClasses[size])}
       />
     </div>
   );

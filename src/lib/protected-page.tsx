@@ -1,11 +1,9 @@
 import { useAuthOverlay } from "@/contexts/AuthContext";
 import { Authenticated, Unauthenticated, AuthLoading } from "convex/react";
 import { LoadingScreen } from "@/components/ui/loading";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 export function Protected({ children }: { children: React.ReactNode }) {
-  const { openAuthOverlay } = useAuthOverlay();
-
   return (
     <>
       <AuthLoading>
@@ -13,7 +11,7 @@ export function Protected({ children }: { children: React.ReactNode }) {
       </AuthLoading>
       
       <Unauthenticated>
-        <UnauthenticatedHandler openAuthOverlay={openAuthOverlay} />
+        <UnauthenticatedHandler />
       </Unauthenticated>
       
       <Authenticated>
@@ -23,9 +21,15 @@ export function Protected({ children }: { children: React.ReactNode }) {
   );
 }
 
-function UnauthenticatedHandler({ openAuthOverlay }: { openAuthOverlay: () => void }) {
+function UnauthenticatedHandler() {
+  const { openAuthOverlay } = useAuthOverlay();
+  const hasTriggered = useRef(false);
+
   useEffect(() => {
-    openAuthOverlay();
+    if (!hasTriggered.current) {
+      hasTriggered.current = true;
+      openAuthOverlay();
+    }
   }, [openAuthOverlay]);
 
   return (
