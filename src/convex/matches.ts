@@ -20,18 +20,106 @@ export const create = mutation({
     }
 
     if (user.verificationLevel !== "host") {
-      throw new Error("Only hosts can create matches");
+      throw new Error("Only verified hosts can create matches");
+    }
+
+    // Server-side validation
+    if (args.entryFee < 10 || args.entryFee > 10000) {
+      throw new Error("Entry fee must be between ₹10 and ₹10,000");
+    }
+
+    if (args.startTime < Date.now()) {
+      throw new Error("Match start time must be in the future");
+    }
+
+    if (!args.title.trim() || args.title.length > 100) {
+      throw new Error("Match title must be between 1-100 characters");
+    }
+
+    // Verify game exists
+    const game = await ctx.db.get(args.gameId);
+    if (!game || !game.isActive) {
+      throw new Error("Invalid or inactive game selected");
     }
 
     return await ctx.db.insert("matches", {
       hostId: user._id,
       gameId: args.gameId,
-      title: args.title,
+      title: args.title.trim(),
       entryFee: args.entryFee,
       startTime: args.startTime,
       streamUrl: args.streamUrl,
       status: "open",
     });
+  },
+});
+
+export const joinMatch = mutation({
+  args: {
+    matchId: v.id("matches"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const user = await getCurrentUser(ctx);
+    
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
+
+    if (user.verificationLevel !== "player" && user.verificationLevel !== "host") {
+      throw new Error("Only verified players can join matches");
+    }
+
+    const match = await ctx.db.get(args.matchId);
+    if (!match) {
+      throw new Error("Match not found");
+    }
+
+    if (match.status !== "open") {
+      throw new Error("Match is not open for joining");
+    }
+
+    if (match.hostId === user._id) {
+      throw new Error("Host cannot join their own match");
+    }
+
+    // Check wallet balance
+    if ((user.walletBalance || 0) < match.entryFee) {
+      throw new Error("Insufficient wallet balance");
+    }
+
+    // Check if match is full
+    if (match.player1Id && match.player2Id) {
+      throw new Error("Match is already full");
+    }
+
+    // Check if user already joined
+    if (match.player1Id === user._id || match.player2Id === user._id) {
+      throw new Error("You have already joined this match");
+    }
+
+    // Deduct entry fee from wallet
+    await ctx.db.patch(user._id, {
+      walletBalance: (user.walletBalance || 0) - match.entryFee,
+    });
+
+    // Add player to match
+    const updateData = match.player1Id 
+      ? { player2Id: user._id, status: "live" as const }
+      : { player1Id: user._id };
+
+    await ctx.db.patch(args.matchId, updateData);
+
+    // Create transaction record
+    await ctx.db.insert("transactions", {
+      userId: user._id,
+      type: "match_entry",
+      amount: -match.entryFee,
+      status: "approved",
+      matchId: args.matchId,
+    });
+
+    return null;
   },
 });
 
@@ -120,19 +208,29 @@ export const declareWinner = mutation({
       throw new Error("Winner must be one of the match players");
     }
 
+    // Prevent duplicate winner declaration
+    if (match.winnerId) {
+      throw new Error("Winner has already been declared for this match");
+    }
+
     await ctx.db.patch(args.matchId, {
       winnerId: args.winnerId,
       status: "completed",
       resultDeclaredAt: Date.now(),
     });
 
-    // Update winner's stats
+    // Calculate payout (90% of total pool)
+    const totalPool = match.entryFee * 2;
+    const payout = Math.floor(totalPool * 0.9);
+
+    // Update winner's stats and wallet
     const winner = await ctx.db.get(args.winnerId);
     if (winner) {
       await ctx.db.patch(args.winnerId, {
         totalWins: (winner.totalWins || 0) + 1,
         totalMatches: (winner.totalMatches || 0) + 1,
-        totalEarnings: (winner.totalEarnings || 0) + (match.entryFee * 2 * 0.9), // 90% payout
+        totalEarnings: (winner.totalEarnings || 0) + payout,
+        walletBalance: (winner.walletBalance || 0) + payout,
       });
     }
 
@@ -151,7 +249,7 @@ export const declareWinner = mutation({
     await ctx.db.insert("transactions", {
       userId: args.winnerId,
       type: "match_payout",
-      amount: match.entryFee * 2 * 0.9, // 90% payout (10% platform fee)
+      amount: payout,
       status: "approved",
       matchId: args.matchId,
     });

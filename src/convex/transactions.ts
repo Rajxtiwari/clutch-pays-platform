@@ -1,6 +1,7 @@
 import { mutation, query, internalMutation, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { getCurrentUser } from "./users";
 
 export const createDeposit = mutation({
   args: {
@@ -10,12 +11,13 @@ export const createDeposit = mutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
+    const user = await getCurrentUser(ctx);
+    if (!user) {
       throw new Error("User not authenticated");
     }
 
-    if (args.amount < 10) {
+    // Server-side validation
+    if (!Number.isInteger(args.amount) || args.amount < 10) {
       throw new Error("Minimum deposit amount is ₹10");
     }
 
@@ -23,15 +25,30 @@ export const createDeposit = mutation({
       throw new Error("Maximum deposit amount is ₹1,00,000");
     }
 
+    // Validate UTR ID format
+    if (!args.utrId.trim() || args.utrId.length < 6 || args.utrId.length > 20) {
+      throw new Error("Invalid UTR ID format");
+    }
+
+    // Check for duplicate UTR ID
+    const existingTransaction = await ctx.db
+      .query("transactions")
+      .filter((q) => q.eq(q.field("utrId"), args.utrId))
+      .first();
+
+    if (existingTransaction) {
+      throw new Error("UTR ID already used");
+    }
+
     // Generate unique amount for verification
     const uniqueAmount = args.amount + (Math.random() * 0.99);
 
     await ctx.db.insert("transactions", {
-      userId,
+      userId: user._id,
       type: "deposit",
       amount: args.amount,
       status: "pending",
-      utrId: args.utrId,
+      utrId: args.utrId.trim(),
       paymentScreenshot: args.paymentScreenshot,
       uniqueAmount,
     });
@@ -46,31 +63,46 @@ export const createWithdrawal = mutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
+    const user = await getCurrentUser(ctx);
+    if (!user) {
       throw new Error("User not authenticated");
     }
 
-    const user = await ctx.db.get(userId);
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    if (args.amount < 100) {
+    // Server-side validation
+    if (!Number.isInteger(args.amount) || args.amount < 100) {
       throw new Error("Minimum withdrawal amount is ₹100");
     }
 
-    if ((user.walletBalance || 0) < args.amount) {
-      throw new Error("Insufficient wallet balance");
+    if (args.amount > 50000) {
+      throw new Error("Maximum withdrawal amount is ₹50,000 per transaction");
+    }
+
+    const currentBalance = user.walletBalance || 0;
+    if (currentBalance < args.amount) {
+      throw new Error(`Insufficient balance. Available: ₹${currentBalance}`);
+    }
+
+    // Check for pending withdrawals
+    const pendingWithdrawals = await ctx.db
+      .query("transactions")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .filter((q) => q.and(
+        q.eq(q.field("type"), "withdrawal"),
+        q.eq(q.field("status"), "pending")
+      ))
+      .collect();
+
+    if (pendingWithdrawals.length > 0) {
+      throw new Error("You have a pending withdrawal. Please wait for it to be processed.");
     }
 
     // Deduct amount from wallet immediately
-    await ctx.db.patch(userId, {
-      walletBalance: (user.walletBalance || 0) - args.amount,
+    await ctx.db.patch(user._id, {
+      walletBalance: currentBalance - args.amount,
     });
 
     await ctx.db.insert("transactions", {
-      userId,
+      userId: user._id,
       type: "withdrawal",
       amount: args.amount,
       status: "pending",

@@ -4,12 +4,16 @@ import { Badge } from "@/components/ui/badge";
 import { api } from "@/convex/_generated/api";
 import { motion } from "framer-motion";
 import { Calendar, Clock, DollarSign, GamepadIcon, Users, Video } from "lucide-react";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "sonner";
+import { useAuth } from "@/hooks/use-auth";
 
 export function MatchBrowser() {
   const matches = useQuery(api.matches.listOpen);
   const games = useQuery(api.games.list);
+  const { user } = useAuth();
+  const joinMatch = useMutation(api.matches.joinMatch);
 
   const getGameName = (gameId: string) => {
     return games?.find(g => g._id === gameId)?.name || "Unknown Game";
@@ -23,6 +27,25 @@ export function MatchBrowser() {
       return `Starts ${formatDistanceToNow(date, { addSuffix: true })}`;
     } else {
       return "Starting now";
+    }
+  };
+
+  const handleJoinMatch = async (matchId: string, entryFee: number) => {
+    if (!user) {
+      toast.error("Please sign in to join matches");
+      return;
+    }
+
+    if ((user.walletBalance || 0) < entryFee) {
+      toast.error("Insufficient wallet balance");
+      return;
+    }
+
+    try {
+      await joinMatch({ matchId });
+      toast.success("Successfully joined the match!");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to join match");
     }
   };
 
@@ -139,8 +162,12 @@ export function MatchBrowser() {
                   </div>
                   
                   <div className="flex space-x-2">
-                    <Button className="flex-1">
-                      Join Match
+                    <Button 
+                      className="flex-1"
+                      onClick={() => handleJoinMatch(match._id, match.entryFee)}
+                      disabled={!user || (user.walletBalance || 0) < match.entryFee}
+                    >
+                      Join Match (₹{match.entryFee})
                     </Button>
                     <Button variant="outline">
                       View Details
