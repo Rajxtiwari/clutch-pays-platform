@@ -1,243 +1,167 @@
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
-import { Label } from "@/components/ui/label";
-import { useAuth } from "@/hooks/use-auth";
-import { ArrowRight, Loader2, Mail } from "lucide-react";
 import { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { useAuthActions } from "@convex-dev/auth/react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { motion } from "framer-motion";
+import { GamepadIcon, Mail, ArrowRight } from "lucide-react";
+import { toast } from "sonner";
+import { SignupForm } from "./SignupForm";
+import { TermsAcceptance } from "./TermsAcceptance";
+
+interface SignupData {
+  email: string;
+  username: string;
+  password: string;
+  dateOfBirth: string;
+}
 
 interface AuthCardProps {
   onAuthSuccess?: () => void;
 }
 
 export function AuthCard({ onAuthSuccess }: AuthCardProps) {
-  const { signIn } = useAuth();
-  const [step, setStep] = useState<"signIn" | { email: string }>("signIn");
-  const [otp, setOtp] = useState("");
+  const { signIn } = useAuthActions();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [searchParams] = useSearchParams();
+  const [signupStep, setSignupStep] = useState<"form" | "terms">("form");
+  const [signupData, setSignupData] = useState<SignupData | null>(null);
 
-  const navigate = useNavigate();
+  // Sign In with Email/Password
+  const [signInEmail, setSignInEmail] = useState("");
+  const [signInPassword, setSignInPassword] = useState("");
 
-  const handleEmailSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsLoading(true);
-    setError(null);
+
     try {
-      const formData = new FormData(event.currentTarget);
-      if (!signIn) {
-        throw new Error("Authentication not ready");
-      }
-      await signIn("email-otp", formData);
-      setStep({ email: formData.get("email") as string });
-      setIsLoading(false);
+      await signIn("password", {
+        email: signInEmail,
+        password: signInPassword,
+        flow: "signIn",
+      });
+      
+      toast.success("Welcome back!");
+      onAuthSuccess?.();
     } catch (error) {
-      console.error("Email sign-in error:", error);
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Failed to send verification code. Please try again.",
-      );
+      console.error("Sign in error:", error);
+      toast.error("Invalid email or password. Please try again.");
+    } finally {
       setIsLoading(false);
     }
   };
 
-  const handleOtpSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleSignupFormNext = (data: SignupData) => {
+    setSignupData(data);
+    setSignupStep("terms");
+  };
+
+  const handleTermsAccept = async () => {
+    if (!signupData) return;
+
     setIsLoading(true);
-    setError(null);
     try {
-      const formData = new FormData(event.currentTarget);
-      if (!signIn) {
-        throw new Error("Authentication not ready");
+      await signIn("password", {
+        email: signupData.email,
+        password: signupData.password,
+        username: signupData.username,
+        dateOfBirth: signupData.dateOfBirth,
+        flow: "signUp",
+      });
+
+      toast.success("Account created successfully! Welcome to GameArena!");
+      onAuthSuccess?.();
+    } catch (error: any) {
+      console.error("Sign up error:", error);
+      if (error.message?.includes("already exists")) {
+        toast.error("An account with this email already exists. Please sign in instead.");
+        setSignupStep("form");
+      } else {
+        toast.error("Failed to create account. Please try again.");
       }
-      await signIn("email-otp", formData);
-
-      console.log("signed in");
-
-      if (onAuthSuccess) {
-        onAuthSuccess();
-      }
-
-      navigate(searchParams.get("redirect") || "/dashboard");
-    } catch (error) {
-      console.error("OTP verification error:", error);
-
-      setError("The verification code you entered is incorrect.");
+    } finally {
       setIsLoading(false);
-
-      setOtp("");
     }
   };
+
+  const handleTermsBack = () => {
+    setSignupStep("form");
+  };
+
+  if (signupStep === "terms") {
+    return (
+      <TermsAcceptance
+        onAccept={handleTermsAccept}
+        onBack={handleTermsBack}
+        isLoading={isLoading}
+      />
+    );
+  }
 
   return (
-    <>
-      <div className="flex items-center justify-center h-full flex-col">
-        <Card className="min-w-[350px] pb-0 border shadow-md">
-          {step === "signIn" ? (
-            <>
-              <CardHeader className="text-center">
-                <CardTitle className="text-xl">Get Started</CardTitle>
-                <CardDescription>
-                  Enter your email to log in or sign up
-                </CardDescription>
-              </CardHeader>
-              <form onSubmit={handleEmailSubmit}>
-                <CardContent>
-                  <div className="flex justify-center">
-                    <img
-                      src="./auth.svg"
-                      alt="Lock Icon"
-                      width={200}
-                      height={200}
-                      className="rounded-lg -mt-4"
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <Label htmlFor="email">Enter your email</Label>
-                  </div>
-                  <div className="relative flex items-center gap-2">
-                    <div className="relative flex-1">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        name="email"
-                        placeholder="name@example.com"
-                        type="email"
-                        className="pl-9"
-                        disabled={isLoading}
-                        required
-                      />
-                    </div>
-                    <Button
-                      type="submit"
-                      variant="outline"
-                      size="icon"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <ArrowRight className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                  {error && (
-                    <p className="mt-2 text-sm text-red-500">{error}</p>
-                  )}
-                </CardContent>
-              </form>
-            </>
-          ) : (
-            <>
-              <CardHeader className="text-center mt-4">
-                <CardTitle>Check your email</CardTitle>
-                <CardDescription>
-                  We've sent a code to {step.email}
-                </CardDescription>
-              </CardHeader>
-              <form onSubmit={handleOtpSubmit}>
-                <CardContent className="pb-4">
-                  <input type="hidden" name="email" value={step.email} />
-                  <input type="hidden" name="code" value={otp} />
-
-                  <div className="flex justify-center">
-                    <InputOTP
-                      value={otp}
-                      onChange={setOtp}
-                      maxLength={6}
-                      disabled={isLoading}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && otp.length === 6 && !isLoading) {
-                          // Find the closest form and submit it
-                          const form = (e.target as HTMLElement).closest("form");
-                          if (form) {
-                            form.requestSubmit();
-                          }
-                        }
-                      }}
-                    >
-                      <InputOTPGroup>
-                        {Array.from({ length: 6 }).map((_, index) => (
-                          <InputOTPSlot key={index} index={index} />
-                        ))}
-                      </InputOTPGroup>
-                    </InputOTP>
-                  </div>
-                  {error && (
-                    <p className="mt-2 text-sm text-red-500 text-center">
-                      {error}
-                    </p>
-                  )}
-                  <p className="text-sm text-muted-foreground text-center mt-4">
-                    Didn't receive a code?{" "}
-                    <Button
-                      variant="link"
-                      className="p-0 h-auto"
-                      onClick={() => setStep("signIn")}
-                    >
-                      Try again
-                    </Button>
-                  </p>
-                </CardContent>
-                <CardFooter className="flex-col gap-2">
-                  <Button
-                    type="submit"
-                    className="w-full"
-                    disabled={isLoading || otp.length !== 6}
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Verifying...
-                      </>
-                    ) : (
-                      <>
-                        Verify code
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </>
-                    )}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => setStep("signIn")}
-                    disabled={isLoading}
-                    className="w-full"
-                  >
-                    Use different email
-                  </Button>
-                </CardFooter>
-              </form>
-            </>
-          )}
-
-          <div className="py-4 px-6 text-xs text-center text-muted-foreground bg-muted border-t rounded-b-lg">
-            Secured by{" "}
-            <a
-              href="https://vly.ai"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline hover:text-primary transition-colors"
-            >
-              vly.ai
-            </a>
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3 }}
+    >
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader className="text-center">
+          <div className="flex items-center justify-center mb-4">
+            <div className="h-12 w-12 bg-primary rounded-lg flex items-center justify-center">
+              <GamepadIcon className="h-6 w-6 text-primary-foreground" />
+            </div>
           </div>
-        </Card>
-      </div>
-    </>
+          <CardTitle className="text-2xl font-bold">Welcome to GameArena</CardTitle>
+          <p className="text-muted-foreground">
+            Sign in to your account or create a new one
+          </p>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="signin" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="signin">Sign In</TabsTrigger>
+              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="signin" className="space-y-4 mt-6">
+              <form onSubmit={handleSignIn} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="signin-email">Email</Label>
+                  <Input
+                    id="signin-email"
+                    type="email"
+                    placeholder="Enter your email"
+                    value={signInEmail}
+                    onChange={(e) => setSignInEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signin-password">Password</Label>
+                  <Input
+                    id="signin-password"
+                    type="password"
+                    placeholder="Enter your password"
+                    value={signInPassword}
+                    onChange={(e) => setSignInPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? "Signing In..." : "Sign In"}
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </form>
+            </TabsContent>
+
+            <TabsContent value="signup" className="mt-6">
+              <SignupForm onNext={handleSignupFormNext} />
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }

@@ -80,13 +80,16 @@ const schema = defineSchema(
 
       role: v.optional(roleValidator), // role of the user. do not remove
       
+      // Enhanced auth fields
+      username: v.optional(v.string()),
+      dateOfBirth: v.optional(v.string()),
+      
       // Gaming platform specific fields
       verificationLevel: v.optional(verificationLevelValidator),
       walletBalance: v.optional(v.number()),
       firstName: v.optional(v.string()),
       lastName: v.optional(v.string()),
       mobileNumber: v.optional(v.string()),
-      dateOfBirth: v.optional(v.string()),
       address: v.optional(v.string()),
       city: v.optional(v.string()),
       postalCode: v.optional(v.string()),
@@ -98,7 +101,8 @@ const schema = defineSchema(
       totalWins: v.optional(v.number()),
       totalEarnings: v.optional(v.number()),
       isProfilePrivate: v.optional(v.boolean()),
-    }).index("email", ["email"]), // index for the email. do not remove or modify
+    }).index("email", ["email"]) // index for the email. do not remove or modify
+      .index("username", ["username"]), // index for username uniqueness
 
     // Games supported on the platform
     games: defineTable({
