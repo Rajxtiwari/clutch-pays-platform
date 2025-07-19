@@ -41,11 +41,24 @@ export function AuthCard({ onAuthSuccess }: AuthCardProps) {
   const initiatePasswordReset = useMutation(api.userValidation.initiatePasswordReset);
   const signInWithCredentials = useMutation(api.userValidation.signInWithCredentials);
 
+  const handleAuthSuccess = () => {
+    // Close the overlay first
+    if (onAuthSuccess) {
+      onAuthSuccess();
+    }
+    
+    // Then navigate to dashboard after a short delay
+    setTimeout(() => {
+      navigate("/dashboard");
+    }, 100);
+  };
+
   const handleEmailSignIn = async (email: string) => {
     setIsLoading(true);
     try {
       await signIn("resend-otp", { email });
       toast.success("Check your email for the verification code");
+      // Don't call handleAuthSuccess here, wait for actual authentication
     } catch (error) {
       console.error("Sign in error:", error);
       toast.error("Failed to send verification email");
@@ -73,10 +86,7 @@ export function AuthCard({ onAuthSuccess }: AuthCardProps) {
       });
       
       toast.success("Welcome back to GameArena!");
-      
-      if (onAuthSuccess) {
-        onAuthSuccess();
-      }
+      handleAuthSuccess();
       
     } catch (error: any) {
       console.error("Sign in error:", error);
@@ -122,11 +132,7 @@ export function AuthCard({ onAuthSuccess }: AuthCardProps) {
       });
       
       toast.success("Account created successfully! Welcome to GameArena!");
-      
-      // Call the success callback if provided
-      if (onAuthSuccess) {
-        onAuthSuccess();
-      }
+      handleAuthSuccess();
       
     } catch (error: any) {
       console.error("Signup error:", error);
