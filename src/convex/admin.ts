@@ -259,3 +259,92 @@ export const rejectTransaction = mutation({
     return null;
   },
 });
+
+export const getVerificationQueue = query({
+  args: {},
+  returns: v.array(v.any()),
+  handler: async (ctx) => {
+    const user = await getCurrentUser(ctx);
+    if (!user || user.role !== "admin") {
+      throw new Error("Admin access required");
+    }
+
+    return await ctx.db
+      .query("verificationRequests")
+      .withIndex("by_status", (q) => q.eq("status", "pending"))
+      .collect();
+  },
+});
+
+export const approveVerification = mutation({
+  args: {
+    requestId: v.id("verificationRequests"),
+    adminNotes: v.optional(v.string()),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const user = await getCurrentUser(ctx);
+    if (!user || user.role !== "admin") {
+      throw new Error("Admin access required");
+    }
+
+    const request = await ctx.db.get(args.requestId);
+    if (!request) {
+      throw new Error("Verification request not found");
+    }
+
+    // Update verification request
+    await ctx.db.patch(args.requestId, {
+      status: "approved",
+      rejectionReason: args.adminNotes,
+    });
+
+    // Update user verification level
+    await ctx.db.patch(request.userId, {
+      verificationLevel: request.level,
+    });
+
+    return null;
+  },
+});
+
+export const rejectVerification = mutation({
+  args: {
+    requestId: v.id("verificationRequests"),
+    rejectionReason: v.string(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const user = await getCurrentUser(ctx);
+    if (!user || user.role !== "admin") {
+      throw new Error("Admin access required");
+    }
+
+    await ctx.db.patch(args.requestId, {
+      status: "rejected",
+      rejectionReason: args.rejectionReason,
+    });
+
+    return null;
+  },
+});
+
+export const updateUserRole = mutation({
+  args: {
+    userId: v.id("users"),
+    role: v.union(v.literal("admin"), v.literal("user"), v.literal("member")),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const admin = await getCurrentUser(ctx);
+    if (!admin || admin.role !== "admin") {
+      throw new Error("Admin access required");
+    }
+
+    await ctx.db.patch(args.userId, {
+      role: args.role,
+    });
+
+    return null;
+  },
+});

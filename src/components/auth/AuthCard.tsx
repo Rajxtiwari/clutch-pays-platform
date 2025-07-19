@@ -25,7 +25,7 @@ interface AuthCardProps {
   onAuthSuccess?: () => void;
 }
 
-export function AuthCard() {
+export function AuthCard({ onAuthSuccess }: AuthCardProps) {
   const { signIn } = useAuthActions();
   const [isLoading, setIsLoading] = useState(false);
   const [signupStep, setSignupStep] = useState<"form" | "terms" | "otp">("form");
@@ -281,26 +281,16 @@ export function AuthCard() {
       {/* Content Area with Fixed Height */}
       <div className="min-h-[400px] max-h-[60vh] overflow-y-auto">
         {activeTab === "signin" ? (
-          <SignInForm />
-        ) : signupStep === "form" ? (
-          <SignupForm onComplete={handleSignupComplete} isLoading={isLoading} />
-        ) : signupStep === "terms" ? (
-          <TermsAcceptance 
-            onAccept={handleTermsAccept} 
-            onBack={() => setSignupStep("form")}
-            isLoading={isLoading}
-          />
-        ) : signupStep === "otp" ? (
-          <OtpVerification />
+          <SignInForm onPasswordSignIn={handlePasswordSignIn} isLoading={isLoading} />
         ) : (
-          <AccountCreated />
+          <SignupForm onComplete={handleSignupFormComplete} isLoading={isLoading} />
         )}
       </div>
     </div>
   );
 }
 
-function SignInForm() {
+function SignInForm({ onPasswordSignIn, isLoading }: { onPasswordSignIn: (identifier: string, password: string) => void, isLoading: boolean }) {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
