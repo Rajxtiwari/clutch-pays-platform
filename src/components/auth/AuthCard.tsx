@@ -25,7 +25,7 @@ interface AuthCardProps {
   onAuthSuccess?: () => void;
 }
 
-export function AuthCard({ onAuthSuccess }: AuthCardProps) {
+export function AuthCard() {
   const { signIn } = useAuthActions();
   const [isLoading, setIsLoading] = useState(false);
   const [signupStep, setSignupStep] = useState<"form" | "terms" | "otp">("form");
@@ -37,6 +37,7 @@ export function AuthCard({ onAuthSuccess }: AuthCardProps) {
   });
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
   const [otpCode, setOtpCode] = useState("");
+  const [activeTab, setActiveTab] = useState<"signin" | "signup">("signin");
 
   const signInWithCredentials = useMutation(api.userValidation.signInWithCredentials);
 
@@ -235,58 +236,71 @@ export function AuthCard({ onAuthSuccess }: AuthCardProps) {
 
   // Main Auth Form
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="w-full max-w-md mx-auto"
-    >
-      <Card>
-        <CardHeader className="text-center">
-          <div className="flex items-center justify-center mb-4">
-            <div className="h-12 w-12 bg-primary rounded-lg flex items-center justify-center">
-              <img src="/assets/logo.png" alt="Clutch Pays" className="h-6 w-6" />
-            </div>
+    <div className="w-full max-w-md mx-auto">
+      <motion.div
+        className="text-center mb-6"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="flex justify-center mb-4">
+          <div className="h-16 w-16 bg-primary rounded-2xl flex items-center justify-center">
+            <img src="/assets/logo.png" alt="Clutch Pays" className="h-8 w-8" />
           </div>
-          <CardTitle className="text-2xl font-bold">Welcome to Clutch Pays</CardTitle>
-          <p className="text-muted-foreground">
-            Join the ultimate skill-based gaming platform
-          </p>
-        </CardHeader>
-        <CardContent>
-          <Tabs value={authMode} onValueChange={(value) => setAuthMode(value as "signin" | "signup")}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="signin" className="space-y-4">
-              <SignInForm 
-                onPasswordSignIn={handlePasswordSignIn}
-                isLoading={isLoading} 
-              />
-            </TabsContent>
-            
-            <TabsContent value="signup" className="space-y-4">
-              <SignupForm 
-                onComplete={handleSignupFormComplete}
-                isLoading={isLoading}
-              />
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
-    </motion.div>
+        </div>
+        <h1 className="text-2xl font-bold tracking-tight">Welcome to Clutch Pays</h1>
+        <p className="text-muted-foreground mt-2">
+          Join the ultimate skill-based gaming platform
+        </p>
+      </motion.div>
+
+      {/* Tab Navigation */}
+      <div className="flex mb-6 bg-muted rounded-lg p-1">
+        <button
+          onClick={() => setActiveTab("signin")}
+          className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+            activeTab === "signin"
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Sign In
+        </button>
+        <button
+          onClick={() => setActiveTab("signup")}
+          className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+            activeTab === "signup"
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Sign Up
+        </button>
+      </div>
+
+      {/* Content Area with Fixed Height */}
+      <div className="min-h-[400px] max-h-[60vh] overflow-y-auto">
+        {activeTab === "signin" ? (
+          <SignInForm />
+        ) : signupStep === "form" ? (
+          <SignupForm onComplete={handleSignupComplete} isLoading={isLoading} />
+        ) : signupStep === "terms" ? (
+          <TermsAcceptance 
+            onAccept={handleTermsAccept} 
+            onBack={() => setSignupStep("form")}
+            isLoading={isLoading}
+          />
+        ) : signupStep === "otp" ? (
+          <OtpVerification />
+        ) : (
+          <AccountCreated />
+        )}
+      </div>
+    </div>
   );
 }
 
-function SignInForm({ 
-  onPasswordSignIn,
-  isLoading 
-}: { 
-  onPasswordSignIn: (identifier: string, password: string) => void;
-  isLoading: boolean;
-}) {
+function SignInForm() {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);

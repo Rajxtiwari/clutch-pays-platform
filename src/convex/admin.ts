@@ -122,6 +122,12 @@ export const getDashboardStats = query({
     totalTransactions: v.number(),
     pendingTransactions: v.number(),
     totalRevenue: v.number(),
+    newUsersToday: v.number(),
+    activeMatches: v.number(),
+    pendingVerifications: v.number(),
+    pendingDeposits: v.number(),
+    pendingWithdrawals: v.number(),
+    openTickets: v.number(),
   }),
   handler: async (ctx) => {
     const user = await getCurrentUser(ctx);
@@ -129,13 +135,27 @@ export const getDashboardStats = query({
       throw new Error("Admin access required");
     }
 
-    const [users, matches, transactions] = await Promise.all([
+    const [users, matches, transactions, verificationRequests, supportTickets] = await Promise.all([
       ctx.db.query("users").collect(),
       ctx.db.query("matches").collect(),
       ctx.db.query("transactions").collect(),
+      ctx.db.query("verificationRequests").collect(),
+      ctx.db.query("supportTickets").collect(),
     ]);
 
+    // Calculate today's date for new users
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayTimestamp = today.getTime();
+
+    const newUsersToday = users.filter(u => u._creationTime >= todayTimestamp).length;
+    const activeMatches = matches.filter(m => m.status === "live" || m.status === "open").length;
     const pendingTransactions = transactions.filter(t => t.status === "pending").length;
+    const pendingDeposits = transactions.filter(t => t.status === "pending" && t.type === "deposit").length;
+    const pendingWithdrawals = transactions.filter(t => t.status === "pending" && t.type === "withdrawal").length;
+    const pendingVerifications = verificationRequests.filter(v => v.status === "pending").length;
+    const openTickets = supportTickets.filter(t => t.status === "open").length;
+    
     const totalRevenue = transactions
       .filter(t => t.status === "approved" && t.type === "deposit")
       .reduce((sum, t) => sum + t.amount, 0);
@@ -146,6 +166,12 @@ export const getDashboardStats = query({
       totalTransactions: transactions.length,
       pendingTransactions,
       totalRevenue,
+      newUsersToday,
+      activeMatches,
+      pendingVerifications,
+      pendingDeposits,
+      pendingWithdrawals,
+      openTickets,
     };
   },
 });
