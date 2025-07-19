@@ -39,6 +39,9 @@ export function AuthCard({ onAuthSuccess }: AuthCardProps) {
     setError(null);
     try {
       const formData = new FormData(event.currentTarget);
+      if (!signIn) {
+        throw new Error("Authentication not ready");
+      }
       await signIn("email-otp", formData);
       setStep({ email: formData.get("email") as string });
       setIsLoading(false);
@@ -59,6 +62,9 @@ export function AuthCard({ onAuthSuccess }: AuthCardProps) {
     setError(null);
     try {
       const formData = new FormData(event.currentTarget);
+      if (!signIn) {
+        throw new Error("Authentication not ready");
+      }
       await signIn("email-otp", formData);
 
       console.log("signed in");
