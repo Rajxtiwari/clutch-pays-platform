@@ -76,9 +76,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               className="flex items-center space-x-2"
             >
               <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
-                <GamepadIcon className="h-5 w-5 text-primary-foreground" />
+                <img src="/assets/logo.png" alt="Clutch Pays" className="h-5 w-5" />
               </div>
-              <span className="font-bold text-lg">GameArena</span>
+              <span className="font-bold text-lg">Clutch Pays</span>
             </motion.div>
           </Link>
 

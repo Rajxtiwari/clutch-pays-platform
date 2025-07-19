@@ -23,9 +23,9 @@ export default function Landing() {
         <div className="container flex h-16 items-center justify-between px-4">
           <div className="flex items-center space-x-2">
             <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
-              <GamepadIcon className="h-5 w-5 text-primary-foreground" />
+              <img src="/assets/logo.png" alt="Clutch Pays" className="h-6 w-6" />
             </div>
-            <span className="font-bold text-xl">GameArena</span>
+            <span className="font-bold text-xl">Clutch Pays</span>
           </div>
           
           <div className="flex items-center space-x-4">
@@ -92,7 +92,7 @@ export default function Landing() {
           className="text-center mb-16"
         >
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Why Choose GameArena?
+            Why Choose Clutch Pays?
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Experience the future of competitive gaming with our secure, 
@@ -172,7 +172,7 @@ export default function Landing() {
             Ready to Start Winning?
           </h2>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Join GameArena today and turn your gaming skills into real earnings.
+            Join Clutch Pays today and turn your gaming skills into real earnings.
           </p>
           
           <AuthButton 
@@ -202,9 +202,9 @@ export default function Landing() {
             <div className="space-y-4">
               <div className="flex items-center space-x-2">
                 <div className="h-6 w-6 bg-primary rounded flex items-center justify-center">
-                  <GamepadIcon className="h-4 w-4 text-primary-foreground" />
+                  <img src="/assets/logo.png" alt="Clutch Pays" className="h-4 w-4" />
                 </div>
-                <span className="font-semibold">GameArena</span>
+                <span className="font-semibold">Clutch Pays</span>
               </div>
               <p className="text-sm text-muted-foreground">
                 India's premier skill-based gaming platform. Compete, win, and earn real money through fair and transparent gameplay.
@@ -249,7 +249,7 @@ export default function Landing() {
           <div className="mt-8 pt-8 border-t">
             <div className="flex flex-col md:flex-row items-center justify-between">
               <div className="text-sm text-muted-foreground mb-4 md:mb-0">
-                © 2024 GameArena Technologies Pvt. Ltd. All rights reserved. Play responsibly.
+                © 2024 Clutch Pays Technologies Pvt. Ltd. All rights reserved. Play responsibly.
               </div>
               <div className="flex items-center space-x-6 text-sm text-muted-foreground">
                 <span>🔒 Secure Payments</span>

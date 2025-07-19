@@ -167,10 +167,10 @@ export function AuthCard({ onAuthSuccess }: AuthCardProps) {
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mb-4">
             <div className="h-12 w-12 bg-primary rounded-lg flex items-center justify-center">
-              <GamepadIcon className="h-6 w-6 text-primary-foreground" />
+              <img src="/assets/logo.png" alt="Clutch Pays" className="h-6 w-6" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold">Welcome to GameArena</CardTitle>
+          <CardTitle className="text-2xl font-bold">Welcome to Clutch Pays</CardTitle>
           <p className="text-muted-foreground">
             Join the ultimate skill-based gaming platform
           </p>

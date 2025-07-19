@@ -8,7 +8,7 @@
 import { Button } from "@/components/ui/button";
 import { useAuthOverlay } from "@/contexts/AuthContext";
 import { Authenticated, Unauthenticated, useConvexAuth } from "convex/react";
-import { Loader2 } from "lucide-react";
+import { Loading } from "@/components/ui/loading";
 import { Link } from "react-router";
 
 interface AuthButtonProps {
@@ -38,7 +38,7 @@ export function AuthButton({
     return (
       <Button disabled>
         <div className="flex items-center gap-2">
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <Loading size="sm" />
           Loading...
         </div>
       </Button>
