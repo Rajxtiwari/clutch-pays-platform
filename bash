@@ -1,2 +1,1 @@
-# Start everything with one command
-docker-compose up -d
+# See LOCAL_SETUP.md for detailed steps
