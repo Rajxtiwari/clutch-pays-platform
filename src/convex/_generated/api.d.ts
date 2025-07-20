@@ -14,9 +14,7 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as admin from "../admin.js";
-import type * as auth_customPassword from "../auth/customPassword.js";
 import type * as auth_emailOtp from "../auth/emailOtp.js";
-import type * as auth_passwordAuth from "../auth/passwordAuth.js";
 import type * as auth from "../auth.js";
 import type * as games from "../games.js";
 import type * as generators_clearUserData from "../generators/clearUserData.js";
@@ -41,9 +39,7 @@ import type * as users from "../users.js";
  */
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
-  "auth/customPassword": typeof auth_customPassword;
   "auth/emailOtp": typeof auth_emailOtp;
-  "auth/passwordAuth": typeof auth_passwordAuth;
   auth: typeof auth;
   games: typeof games;
   "generators/clearUserData": typeof generators_clearUserData;
