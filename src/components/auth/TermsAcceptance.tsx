@@ -19,6 +19,10 @@ export function TermsAcceptance({ onAccept, onBack, isLoading = false }: TermsAc
 
   const canProceed = acceptedTerms && acceptedPrivacy && confirmedAge;
 
+  const handleCheckboxChange = (setter: (value: boolean) => void) => (checked: any) => {
+    setter(checked === true);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -104,7 +108,7 @@ export function TermsAcceptance({ onAccept, onBack, isLoading = false }: TermsAc
               <Checkbox
                 id="terms"
                 checked={acceptedTerms}
-                onCheckedChange={setAcceptedTerms}
+                onCheckedChange={handleCheckboxChange(setAcceptedTerms)}
                 disabled={isLoading}
               />
               <label htmlFor="terms" className="text-xs leading-relaxed cursor-pointer">
@@ -116,7 +120,7 @@ export function TermsAcceptance({ onAccept, onBack, isLoading = false }: TermsAc
               <Checkbox
                 id="privacy"
                 checked={acceptedPrivacy}
-                onCheckedChange={setAcceptedPrivacy}
+                onCheckedChange={handleCheckboxChange(setAcceptedPrivacy)}
                 disabled={isLoading}
               />
               <label htmlFor="privacy" className="text-xs leading-relaxed cursor-pointer">
@@ -128,7 +132,7 @@ export function TermsAcceptance({ onAccept, onBack, isLoading = false }: TermsAc
               <Checkbox
                 id="age"
                 checked={confirmedAge}
-                onCheckedChange={setConfirmedAge}
+                onCheckedChange={handleCheckboxChange(setConfirmedAge)}
                 disabled={isLoading}
               />
               <label htmlFor="age" className="text-xs leading-relaxed cursor-pointer">

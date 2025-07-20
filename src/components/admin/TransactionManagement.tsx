@@ -22,7 +22,7 @@ export function TransactionManagement() {
   const handleApprove = async (transactionId: string, notes?: string) => {
     try {
       await approveTransaction({
-        transactionId,
+        transactionId: transactionId as any,
         approved: true,
         adminNotes: notes,
       });
@@ -36,7 +36,7 @@ export function TransactionManagement() {
   const handleReject = async (transactionId: string, reason: string) => {
     try {
       await rejectTransaction({
-        transactionId,
+        transactionId: transactionId as any,
         adminNotes: reason,
       });
       toast.success("Transaction rejected successfully");

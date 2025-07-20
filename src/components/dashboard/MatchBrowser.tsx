@@ -42,7 +42,7 @@ export function MatchBrowser() {
     }
 
     try {
-      await joinMatch({ matchId });
+      await joinMatch({ matchId: matchId as any });
       toast.success("Successfully joined the match!");
     } catch (error: any) {
       toast.error(error.message || "Failed to join match");
