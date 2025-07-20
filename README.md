@@ -56,35 +56,36 @@ A modern, secure, and responsive gaming platform where players can compete in sk
 - **Webhook Integration** - Automatic payment verification
 - **Multi-currency Support** - INR transactions
 
-## 📦 Installation
+## 🏠 Local Development Setup
 
 ### Prerequisites
 - Node.js 18+ 
 - pnpm (recommended) or npm
 
-### Setup
-1. **Clone the repository**
+### Quick Start
+
+1. **Clone and Install**
+   
    ```bash
    git clone https://github.com/Rajxtiwari/clutch-pays-platform.git
    cd clutch-pays-platform
    ```
 
-2. **Install dependencies**
    ```bash
    pnpm install
    ```
 
-3. **Set up Convex**
+2. **Set up Convex**
    ```bash
    npx convex dev
    ```
 
-4. **Start development server**
+3. **Start development server**
    ```bash
    pnpm dev
    ```
 
-5. **Open in browser**
+4. **Open in browser**
    ```
    http://localhost:5173
    ```
