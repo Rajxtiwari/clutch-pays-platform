@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # Frontend Development Server
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - VITE_CONVEX_URL=http://convex:3210
+    depends_on:
+      - convex
+
+  # Convex Local Server
+  convex:
+    image: node:18-alpine
+    working_dir: /app
+    ports:
+      - "3210:3210"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npx convex dev --host 0.0.0.0
+    environment:
+      - NODE_ENV=development
+
+  # PostgreSQL Database (Alternative option)
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=clutch_pays
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  # Redis for Caching (Optional)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:
