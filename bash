@@ -1,1 +1,6 @@
-# See LOCAL_SETUP.md for detailed steps
+# Clone and setup
+git clone https://github.com/Rajxtiwari/clutch-pays-platform.git
+cd clutch-pays-platform
+pnpm install
+npx convex login
+npx convex dev
