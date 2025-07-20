@@ -3,175 +3,257 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { motion } from "framer-motion";
+import { DollarSign, CreditCard, Smartphone, Upload, CheckCircle, AlertCircle } from "lucide-react";
+import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { useAction } from "convex/react";
 import { toast } from "sonner";
-import { load } from "@cashfreepayments/cashfree-js";
-import { DollarSign, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 interface DepositModalProps {
-  trigger?: React.ReactNode;
-  onSuccess?: () => void;
+  trigger: React.ReactNode;
 }
 
-export function DepositModal({ trigger, onSuccess }: DepositModalProps) {
+export function DepositModal({ trigger }: DepositModalProps) {
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
-  
-  const createDepositOrder = useAction(api.payments.createDepositOrder);
-  const verifyPayment = useAction(api.payments.verifyPaymentPublic);
+  const [utrId, setUtrId] = useState("");
+  const [screenshot, setScreenshot] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("upi");
 
-  const handleDeposit = async () => {
-    const depositAmount = parseFloat(amount);
-    
-    if (!depositAmount || depositAmount < 10) {
+  const { user } = useAuth();
+  const createDeposit = useMutation(api.transactions.createDeposit);
+  const createDepositOrder = useMutation(api.payments.createDepositOrder);
+
+  const handleManualDeposit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) {
+      toast.error("Please sign in to make a deposit");
+      return;
+    }
+
+    const depositAmount = parseInt(amount);
+    if (depositAmount < 10) {
       toast.error("Minimum deposit amount is ₹10");
       return;
     }
 
-    if (depositAmount > 100000) {
-      toast.error("Maximum deposit amount is ₹1,00,000");
+    if (!utrId.trim()) {
+      toast.error("Please enter UTR ID");
       return;
     }
 
-    setIsProcessing(true);
-
+    setIsLoading(true);
     try {
-      // Create order
-      const order = await createDepositOrder({ amount: depositAmount });
-      
-      // Initialize Cashfree
-      const cashfree = await load({
-        mode: process.env.NODE_ENV === "production" ? "production" : "sandbox"
+      await createDeposit({
+        amount: depositAmount,
+        utrId: utrId.trim(),
+        paymentScreenshot: screenshot,
       });
 
-      if (!cashfree) {
-        throw new Error("Failed to load Cashfree SDK");
-      }
-
-      // Start payment
-      const result = await cashfree.checkout({
-        paymentSessionId: order.paymentSessionId,
-        redirectTarget: "_modal"
-      });
-
-      if (result.error) {
-        console.error("Payment error:", result.error);
-        toast.error("Payment failed. Please try again.");
-      } else if (result.redirect) {
-        console.log("Payment requires redirect");
-        // Handle redirect if needed
-      } else {
-        console.log("Payment completed:", result.paymentDetails);
-        
-        // Verify payment
-        const verification = await verifyPayment({ orderId: order.orderId });
-        
-        if (verification.success) {
-          toast.success("Deposit successful! Money added to your wallet.");
-          setAmount("");
-          setOpen(false);
-          onSuccess?.();
-        } else {
-          toast.error(verification.message);
-        }
-      }
-    } catch (error) {
-      console.error("Deposit error:", error);
-      toast.error("Deposit failed. Please try again.");
+      toast.success("Deposit request submitted! It will be reviewed by admin.");
+      setOpen(false);
+      setAmount("");
+      setUtrId("");
+      setScreenshot("");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to submit deposit request");
     } finally {
-      setIsProcessing(false);
+      setIsLoading(false);
     }
   };
 
-  const quickAmounts = [100, 500, 1000, 2000, 5000];
+  const handleOnlinePayment = async () => {
+    if (!user) {
+      toast.error("Please sign in to make a deposit");
+      return;
+    }
+
+    const depositAmount = parseInt(amount);
+    if (depositAmount < 10) {
+      toast.error("Minimum deposit amount is ₹10");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const order = await createDepositOrder({ amount: depositAmount });
+      
+      // Redirect to Cashfree payment page
+      const paymentUrl = `https://sandbox.cashfree.com/billpay/checkout/post/submit?order_id=${order.orderId}&payment_session_id=${order.paymentSessionId}`;
+      window.open(paymentUrl, '_blank');
+      
+      toast.success("Redirecting to payment gateway...");
+      setOpen(false);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to create payment order");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const predefinedAmounts = [100, 500, 1000, 2000, 5000, 10000];
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {trigger || (
-          <Button className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4" />
-            Add Money
-          </Button>
-        )}
+        {trigger}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <DollarSign className="h-5 w-5" />
             Add Money to Wallet
           </DialogTitle>
         </DialogHeader>
-        
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="amount">Amount (₹)</Label>
-            <Input
-              id="amount"
-              type="number"
-              placeholder="Enter amount"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              min="10"
-              max="100000"
-              disabled={isProcessing}
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              Minimum: ₹10, Maximum: ₹1,00,000
-            </p>
-          </div>
 
-          <div>
-            <Label>Quick Select</Label>
-            <div className="grid grid-cols-3 gap-2 mt-2">
-              {quickAmounts.map((quickAmount) => (
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="upi">UPI/Bank Transfer</TabsTrigger>
+            <TabsTrigger value="online">Online Payment</TabsTrigger>
+          </TabsList>
+
+          {/* Amount Selection */}
+          <div className="space-y-4 mt-4">
+            <div>
+              <Label htmlFor="amount">Amount (₹)</Label>
+              <Input
+                id="amount"
+                type="number"
+                placeholder="Enter amount"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                min="10"
+                max="100000"
+                disabled={isLoading}
+              />
+            </div>
+
+            {/* Quick Amount Buttons */}
+            <div className="grid grid-cols-3 gap-2">
+              {predefinedAmounts.map((amt) => (
                 <Button
-                  key={quickAmount}
+                  key={amt}
                   variant="outline"
                   size="sm"
-                  onClick={() => setAmount(quickAmount.toString())}
-                  disabled={isProcessing}
+                  onClick={() => setAmount(amt.toString())}
+                  disabled={isLoading}
                 >
-                  ₹{quickAmount}
+                  ₹{amt}
                 </Button>
               ))}
             </div>
           </div>
 
-          <div className="bg-muted p-3 rounded-lg">
-            <h4 className="font-medium mb-2">Payment Methods</h4>
-            <div className="text-sm text-muted-foreground space-y-1">
-              <div>• UPI (Google Pay, PhonePe, Paytm)</div>
-              <div>• Credit/Debit Cards</div>
-              <div>• Net Banking</div>
-              <div>• Wallets</div>
-            </div>
-          </div>
+          <TabsContent value="upi" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Smartphone className="h-4 w-4" />
+                  UPI Payment Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="bg-muted p-3 rounded-lg">
+                  <p className="font-mono text-sm">clutchpays@paytm</p>
+                  <p className="text-xs text-muted-foreground">UPI ID</p>
+                </div>
+                
+                <div className="bg-muted p-3 rounded-lg">
+                  <p className="font-mono text-sm">Account: 1234567890</p>
+                  <p className="font-mono text-sm">IFSC: PAYTM0123456</p>
+                  <p className="text-xs text-muted-foreground">Bank Transfer</p>
+                </div>
 
-          <Button
-            onClick={handleDeposit}
-            disabled={!amount || isProcessing}
-            className="w-full"
-          >
-            {isProcessing ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Processing...
-              </>
-            ) : (
-              <>
-                <DollarSign className="mr-2 h-4 w-4" />
-                Pay ₹{amount || "0"}
-              </>
-            )}
-          </Button>
+                <div className="bg-orange-50 dark:bg-orange-950/20 p-3 rounded-lg border border-orange-200 dark:border-orange-800">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="h-4 w-4 text-orange-600 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-orange-800 dark:text-orange-200">
+                        Important Instructions
+                      </p>
+                      <ul className="text-xs text-orange-700 dark:text-orange-300 mt-1 space-y-1">
+                        <li>• Pay the exact amount shown</li>
+                        <li>• Save the UTR/Transaction ID</li>
+                        <li>• Upload payment screenshot</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-          <p className="text-xs text-muted-foreground text-center">
-            Powered by Cashfree • Secure payments
-          </p>
-        </div>
+            <form onSubmit={handleManualDeposit} className="space-y-4">
+              <div>
+                <Label htmlFor="utr">UTR/Transaction ID *</Label>
+                <Input
+                  id="utr"
+                  placeholder="Enter UTR or Transaction ID"
+                  value={utrId}
+                  onChange={(e) => setUtrId(e.target.value)}
+                  required
+                  disabled={isLoading}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="screenshot">Payment Screenshot (Optional)</Label>
+                <Textarea
+                  id="screenshot"
+                  placeholder="Paste screenshot URL or describe payment"
+                  value={screenshot}
+                  onChange={(e) => setScreenshot(e.target.value)}
+                  disabled={isLoading}
+                />
+              </div>
+
+              <Button type="submit" className="w-full" disabled={isLoading || !amount || !utrId}>
+                {isLoading ? "Submitting..." : "Submit for Review"}
+              </Button>
+            </form>
+          </TabsContent>
+
+          <TabsContent value="online" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <CreditCard className="h-4 w-4" />
+                  Instant Payment
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-sm">Instant wallet credit</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-sm">Secure payment gateway</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-sm">UPI, Cards, Net Banking</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Button 
+              onClick={handleOnlinePayment}
+              className="w-full" 
+              disabled={isLoading || !amount}
+            >
+              {isLoading ? "Processing..." : `Pay ₹${amount || "0"} Now`}
+            </Button>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

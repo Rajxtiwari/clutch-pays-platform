@@ -1,4 +1,4 @@
-import { query, mutation } from "./_generated/server";
+import { query } from "./_generated/server";
 import { v } from "convex/values";
 
 export const list = query({
@@ -15,20 +15,5 @@ export const list = query({
       .query("games")
       .filter((q) => q.eq(q.field("isActive"), true))
       .collect();
-  },
-});
-
-export const create = mutation({
-  args: {
-    name: v.string(),
-    icon: v.string(),
-  },
-  returns: v.id("games"),
-  handler: async (ctx, args) => {
-    return await ctx.db.insert("games", {
-      name: args.name,
-      icon: args.icon,
-      isActive: true,
-    });
   },
 });
