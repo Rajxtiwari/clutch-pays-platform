@@ -5,16 +5,22 @@ import { Infer, v } from "convex/values";
 // User verification levels
 export const VERIFICATION_LEVELS = {
   PENDING_EMAIL: "pending_email",
-  UNVERIFIED: "unverified", 
-  PLAYER: "player",
-  HOST: "host",
+  UNVERIFIED: "unverified",
+  LEVEL_1_VERIFIED: "level_1_verified", // Email verified
+  LEVEL_2_PENDING: "level_2_pending", // Player verification submitted
+  LEVEL_2_VERIFIED: "level_2_verified", // Player verification approved
+  LEVEL_3_PENDING: "level_3_pending", // Host verification submitted
+  LEVEL_3_VERIFIED: "level_3_verified", // Host verification approved
 } as const;
 
 export const verificationLevelValidator = v.union(
   v.literal(VERIFICATION_LEVELS.PENDING_EMAIL),
   v.literal(VERIFICATION_LEVELS.UNVERIFIED),
-  v.literal(VERIFICATION_LEVELS.PLAYER),
-  v.literal(VERIFICATION_LEVELS.HOST),
+  v.literal(VERIFICATION_LEVELS.LEVEL_1_VERIFIED),
+  v.literal(VERIFICATION_LEVELS.LEVEL_2_PENDING),
+  v.literal(VERIFICATION_LEVELS.LEVEL_2_VERIFIED),
+  v.literal(VERIFICATION_LEVELS.LEVEL_3_PENDING),
+  v.literal(VERIFICATION_LEVELS.LEVEL_3_VERIFIED)
 );
 
 // Match statuses
@@ -51,20 +57,6 @@ export const transactionTypeValidator = v.union(
   v.literal(TRANSACTION_TYPES.REFUND),
 );
 
-// default user roles. can add / remove based on the project as needed
-export const ROLES = {
-  ADMIN: "admin",
-  USER: "user",
-  MEMBER: "member",
-} as const;
-
-export const roleValidator = v.union(
-  v.literal(ROLES.ADMIN),
-  v.literal(ROLES.USER),
-  v.literal(ROLES.MEMBER),
-);
-export type Role = Infer<typeof roleValidator>;
-
 const schema = defineSchema(
   {
     // default auth tables using convex auth.
@@ -72,21 +64,22 @@ const schema = defineSchema(
 
     // the users table is the default users table that is brought in by the authTables
     users: defineTable({
-      name: v.optional(v.string()), // name of the user. do not remove
-      image: v.optional(v.string()), // image of the user. do not remove
-      email: v.optional(v.string()), // email of the user. do not remove
-      emailVerificationTime: v.optional(v.number()), // email verification time. do not remove
-      isAnonymous: v.optional(v.boolean()), // is the user anonymous. do not remove
+      // Base Info from Auth Provider
+      name: v.optional(v.string()), 
+      image: v.optional(v.string()), 
+      email: v.optional(v.string()), 
+      emailVerificationTime: v.optional(v.number()), 
+      isAnonymous: v.optional(v.boolean()), 
 
-      role: v.optional(roleValidator), // role of the user. do not remove
-      
-      // Enhanced auth fields
+      // App-specific user data
       username: v.optional(v.string()),
-      dateOfBirth: v.optional(v.string()),
+      dateOfBirth: v.optional(v.string()), // Storing as string for flexibility, validation at app level
       
-      // Gaming platform specific fields
+      // Verification & Financials
       verificationLevel: v.optional(verificationLevelValidator),
-      walletBalance: v.optional(v.number()),
+      walletBalance: v.optional(v.number()), // Storing as number, represents total balance
+      
+      // Level 1 KYC Data
       firstName: v.optional(v.string()),
       lastName: v.optional(v.string()),
       mobileNumber: v.optional(v.string()),
@@ -94,15 +87,21 @@ const schema = defineSchema(
       city: v.optional(v.string()),
       postalCode: v.optional(v.string()),
       state: v.optional(v.string()),
+
+      // Level 2 KYC Data
       documentType: v.optional(v.string()),
-      documentUrl: v.optional(v.string()),
+      documentUrl: v.optional(v.string()), // URL to stored document
+      
+      // Host Specific Data
       hostRating: v.optional(v.number()),
+
+      // User Stats
       totalMatches: v.optional(v.number()),
       totalWins: v.optional(v.number()),
       totalEarnings: v.optional(v.number()),
       isProfilePrivate: v.optional(v.boolean()),
-    }).index("email", ["email"]) // index for the email. do not remove or modify
-      .index("username", ["username"]), // index for username uniqueness
+    }).index("email", ["email"]) 
+      .index("username", ["username"]), 
 
     // Games supported on the platform
     games: defineTable({
@@ -177,7 +176,9 @@ const schema = defineSchema(
       status: v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected")),
       documentUrl: v.optional(v.string()),
       rejectionReason: v.optional(v.string()),
+      details: v.optional(v.any()), // To store additional details like social media links
     })
+      .index("by_user_and_status", (q) => q.eq("userId", "pending"))
       .index("by_user", ["userId"])
       .index("by_status", ["status"]),
 

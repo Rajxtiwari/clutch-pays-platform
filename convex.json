@@ -1,6 +1,5 @@
 {
   "functions": "src/convex/",
-  "generateCommonJSApi": false,
   "node": {
     "18": true
   }

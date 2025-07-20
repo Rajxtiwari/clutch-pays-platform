@@ -38,6 +38,11 @@ export function AuthCard() {
   const { signIn } = useAuthActions();
   const navigate = useNavigate();
 
+  const handleGoogleSignIn = async () => {
+    await signIn("google");
+    navigate("/dashboard");
+  };
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -188,6 +193,24 @@ export function AuthCard() {
 
       <Button type="submit" className="w-full" disabled={isLoading}>
         {isLoading ? "Signing in..." : "Sign In"}
+      </Button>
+
+      <div className="relative my-4">
+        <Separator />
+        <div className="absolute inset-0 flex items-center">
+          <span className="mx-auto bg-card px-2 text-sm text-muted-foreground">
+            OR
+          </span>
+        </div>
+      </div>
+
+      <Button
+        variant="outline"
+        className="w-full"
+        onClick={handleGoogleSignIn}
+        disabled={isLoading}
+      >
+        Sign in with Google
       </Button>
 
       <div className="text-center">
