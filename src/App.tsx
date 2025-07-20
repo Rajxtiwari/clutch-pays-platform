@@ -11,6 +11,7 @@ import Dashboard from "@/pages/Dashboard";
 import Auth from "@/pages/Auth";
 import Contact from "@/pages/Contact";
 import PaymentCallback from "@/pages/PaymentCallback";
+import Settings from "@/pages/Settings";
 import Admin from "@/pages/Admin";
 import NotFound from "@/pages/NotFound";
 
@@ -43,6 +44,9 @@ function App() {
                 <Route path="/support" element={<SupportHub />} />
                 <Route path="/dashboard/create-match" element={<CreateMatch />} />
                 <Route path="/dashboard/support" element={<SupportHub />} />
+                
+                {/* Settings Route */}
+                <Route path="/settings" element={<Settings />} />
                 
                 {/* Admin Routes */}
                 <Route path="/admin" element={<Admin />} />
