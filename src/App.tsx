@@ -21,9 +21,33 @@ import { MyMatches } from "@/components/dashboard/MyMatches";
 import { SupportHub } from "@/components/dashboard/SupportHub";
 import { CreateMatch } from "@/components/dashboard/CreateMatch";
 
-const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
+// Check if Convex URL is available
+const convexUrl = import.meta.env.VITE_CONVEX_URL;
 
 function App() {
+  // If no Convex URL, show setup message
+  if (!convexUrl) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4 p-8">
+          <h1 className="text-2xl font-bold">Clutch Pays Setup Required</h1>
+          <p className="text-muted-foreground max-w-md">
+            To get started, please run the following commands:
+          </p>
+          <div className="bg-muted p-4 rounded-lg text-left font-mono text-sm">
+            <div>npx convex login</div>
+            <div>npx convex dev</div>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            This will set up your Convex backend and provide the VITE_CONVEX_URL
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const convex = new ConvexReactClient(convexUrl);
+
   return (
     <ConvexProvider client={convex}>
       <ConvexAuthProvider>
