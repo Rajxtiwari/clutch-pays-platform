@@ -5,3 +5,5 @@ pnpm install
 
 npx convex login
 npx convex dev
+
+pnpm dev
